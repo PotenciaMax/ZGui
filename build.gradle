@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group = 'me.zmaster'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.papermc.io/repository/maven-public/' }
+}
+
+dependencies {
+    implementation 'com.github.cryptomorin:XSeries:9.2.0'
+    implementation 'dev.dejvokep:boosted-yaml:1.3.7'
+
+    compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
+}
+
+test {
+    useJUnitPlatform()
+}
