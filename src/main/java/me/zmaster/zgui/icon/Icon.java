@@ -6,9 +6,5 @@ import org.bukkit.inventory.ItemStack;
 @FunctionalInterface
 public interface Icon {
     ItemStack getItem();
-
-    default void clickAction(InventoryClickEvent event) {
-
-    }
-
+    default void clickAction(InventoryClickEvent event) {}
 }

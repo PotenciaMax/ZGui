@@ -2,7 +2,6 @@ package me.zmaster.zgui.menu;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
-import me.zmaster.zgui.SlotPattern;
 import me.zmaster.zgui.ZGui;
 import me.zmaster.zgui.icon.Icon;
 import me.zmaster.zgui.icon.IconHandler;
@@ -19,10 +18,14 @@ import java.util.Map;
 
 public abstract class AbstractMenu implements Menu {
 
+    private final Map<Integer, Icon> iconMap = new HashMap<>();
     private final SlotPattern slotPattern;
     private final Inventory inventory;
-    private final Map<Integer, Icon> iconMap = new HashMap<>();
     private final Menu previousMenu;
+
+    public Map<Integer, Icon> getIconMap() {
+        return iconMap;
+    }
 
     public SlotPattern getSlotPattern() {
         return slotPattern;

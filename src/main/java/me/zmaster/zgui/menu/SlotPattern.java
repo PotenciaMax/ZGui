@@ -1,4 +1,4 @@
-package me.zmaster.zgui;
+package me.zmaster.zgui.menu;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
