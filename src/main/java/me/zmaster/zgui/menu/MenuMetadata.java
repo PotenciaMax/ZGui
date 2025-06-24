@@ -1,10 +1,10 @@
 package me.zmaster.zgui.menu;
 
-import dev.dejvokep.boostedyaml.YamlDocument;
-import dev.dejvokep.boostedyaml.block.implementation.Section;
 import me.zmaster.zgui.icon.IconHandler;
 import me.zmaster.zgui.icon.IconMetadata;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -46,8 +46,9 @@ public final class MenuMetadata {
     }
 
 
-    public MenuMetadata(YamlDocument file, Class<? extends AbstractMenu> menuClass) {
-        this.inventoryName = ChatColor.translateAlternateColorCodes('&', file.getString("name"));
+    public MenuMetadata(YamlConfiguration file, Class<? extends AbstractMenu> menuClass) {
+        String inventoryName = file.getString("name");
+        this.inventoryName = inventoryName == null ? "" : ChatColor.translateAlternateColorCodes('&', inventoryName);
         this.slotPattern = new SlotPattern(file.getStringList("slot_pattern"));
 
         initIconMethods(menuClass);
@@ -71,15 +72,15 @@ public final class MenuMetadata {
                 });
     }
 
-    private void initIconMetas(YamlDocument file) {
-        Section slotsSection = file.getSection("slots");
-        if (slotsSection== null || slotsSection.isEmpty(false)) {
+    private void initIconMetas(YamlConfiguration file) {
+        ConfigurationSection slotsSection = file.getConfigurationSection("slots");
+        if (slotsSection == null) {
             return;
         }
 
-        for (Object key : slotsSection.getKeys()) {
-            IconMetadata iconMetadata = new IconMetadata(file, key.toString());
-            iconMetas.put(key.toString(), iconMetadata);
+        for (String key : slotsSection.getKeys(false)) {
+            IconMetadata iconMetadata = new IconMetadata(file, key);
+            iconMetas.put(key, iconMetadata);
         }
     }
 

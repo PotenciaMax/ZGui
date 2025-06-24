@@ -18,13 +18,13 @@ import java.util.Map;
 
 public abstract class AbstractMenu implements Menu {
 
-    private final Map<Integer, Icon> iconMap = new HashMap<>();
+    private final Map<Integer, Icon> icons = new HashMap<>();
     private final SlotPattern slotPattern;
     private final Inventory inventory;
     private final Menu previousMenu;
 
-    public Map<Integer, Icon> getIconMap() {
-        return iconMap;
+    public Map<Integer, Icon> getIcons() {
+        return icons;
     }
 
     public SlotPattern getSlotPattern() {
@@ -57,7 +57,7 @@ public abstract class AbstractMenu implements Menu {
 
     public void putIcon(char caractere, @NotNull Icon icon, boolean update) {
         for (int slot : slotPattern.getSlotsByChar(caractere)) {
-            iconMap.put(slot, icon);
+            icons.put(slot, icon);
             if (update) {
                 inventory.setItem(slot, icon.getItem());
             }
@@ -66,7 +66,7 @@ public abstract class AbstractMenu implements Menu {
 
     public void onClick(InventoryClickEvent event) {
         if (inventory.equals(event.getClickedInventory())) {
-            Icon icon = iconMap.get(event.getSlot());
+            Icon icon = icons.get(event.getSlot());
             if (icon != null) {
                 icon.clickAction(event);
             }

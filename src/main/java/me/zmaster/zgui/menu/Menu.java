@@ -4,7 +4,7 @@ import org.bukkit.entity.HumanEntity;
 
 public interface Menu {
     /**
-     * Abre o menu para o jogador
+     * Open the menu for the player.
      *
      * @param player ...
      */
