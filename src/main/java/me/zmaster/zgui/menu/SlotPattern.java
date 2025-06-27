@@ -2,6 +2,7 @@ package me.zmaster.zgui.menu;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -10,7 +11,7 @@ public class SlotPattern {
 
     private final char[] slotMatrix;
 
-    public Inventory createInventory(String inventoryName) {
+    public Inventory createInventory(@NotNull String inventoryName) {
         return Bukkit.createInventory(null, slotMatrix.length, inventoryName);
     }
 
@@ -26,10 +27,11 @@ public class SlotPattern {
                 }
             }
         }
+
         return slots;
     }
 
-    public SlotPattern(List<String> rows) {
+    public SlotPattern(@NotNull List<String> rows) {
         assert ! rows.isEmpty();
 
         StringBuilder builder = new StringBuilder();

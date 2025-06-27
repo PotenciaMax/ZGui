@@ -10,6 +10,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +21,6 @@ import java.util.Map;
 public final class IconMetadata {
 
     public static final String DEFAULT_STATE = "default";
-
     private final char slot;
     private final Map<String, ItemStack> itemStates = new HashMap<>();
 
@@ -27,20 +28,23 @@ public final class IconMetadata {
         return slot;
     }
 
-    public ItemStack getItem() {
+    @NotNull
+    public Map<String, ItemStack> getItems() {
+        return itemStates;
+    }
+
+    @Nullable
+    public ItemStack getDefaultItem() {
         return itemStates.get(DEFAULT_STATE);
     }
 
-    public ItemStack getItem(String state) {
-        return itemStates.get(state);
-    }
-
+    @Nullable
     public ItemStack getItemOrDefault(String state) {
-        return itemStates.getOrDefault(state, getItem());
+        return itemStates.getOrDefault(state, getDefaultItem());
     }
 
     public IconMetadata(YamlConfiguration file, String key) {
-        this.slot = file.getObject("slots." + key, char.class);
+        this.slot = file.getString("slots." + key).charAt(0);
 
         ConfigurationSection itemSection = file.getConfigurationSection("items." + key);
         if (itemSection != null) {
@@ -65,15 +69,15 @@ public final class IconMetadata {
     private void setupNestedItems(ConfigurationSection itemSection) {
         for (Object subKey : itemSection.getKeys(false)) {
             ConfigurationSection subSection = itemSection.getConfigurationSection(subKey.toString());
-            itemStates.put(subKey.toString(), getItem(subSection));
+            itemStates.put(subKey.toString(), buildItem(subSection));
         }
     }
 
     private void setupDefaultItem(ConfigurationSection itemSection) {
-        itemStates.put(DEFAULT_STATE, getItem(itemSection));
+        itemStates.put(DEFAULT_STATE, buildItem(itemSection));
     }
 
-    private ItemStack getItem(ConfigurationSection section) {
+    private ItemStack buildItem(ConfigurationSection section) {
         String materialName = section.getString("type", "STONE");
         XMaterial material = XMaterial.matchXMaterial(materialName).orElse(XMaterial.STONE);
 
@@ -111,5 +115,4 @@ public final class IconMetadata {
 
         return item;
     }
-
 }

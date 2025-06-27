@@ -1,7 +1,5 @@
 package me.zmaster.zgui.menu;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 import me.zmaster.zgui.ZGui;
 import me.zmaster.zgui.icon.Icon;
 import me.zmaster.zgui.icon.IconHandler;
@@ -12,6 +10,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,11 +51,11 @@ public abstract class AbstractMenu implements Menu {
         previousMenu.open(player);
     }
 
-    public void putIcon(char caractere, @NotNull Icon icon) {
+    public void putIcon(char caractere, Icon icon) {
         putIcon(caractere, icon, true);
     }
 
-    public void putIcon(char caractere, @NotNull Icon icon, boolean update) {
+    public void putIcon(char caractere, Icon icon, boolean update) {
         for (int slot : slotPattern.getSlotsByChar(caractere)) {
             icons.put(slot, icon);
             if (update) {
@@ -82,7 +82,7 @@ public abstract class AbstractMenu implements Menu {
         putIcon(metadata.getSlot(), new Icon() {
             @Override
             public ItemStack getItem() {
-                return metadata.getItem();
+                return metadata.getDefaultItem();
             }
 
             @Override
@@ -98,9 +98,9 @@ public abstract class AbstractMenu implements Menu {
             @Override
             public ItemStack getItem() {
                 if (previousMenu == null) {
-                    return metadata.getItem("close");
+                    return metadata.getItems().get("close");
                 }
-                return metadata.getItem();
+                return metadata.getDefaultItem();
             }
 
             @Override
@@ -110,9 +110,15 @@ public abstract class AbstractMenu implements Menu {
         });
     }
 
-    public AbstractMenu(MenuMetadata metadata, @Nullable Menu previousMenu) {
+    public AbstractMenu(@NotNull MenuMetadata metadata, @Nullable Menu previousMenu) {
         this.slotPattern = metadata.getSlotPattern();
         this.inventory = slotPattern.createInventory(metadata.getInventoryName());
+        this.previousMenu = previousMenu;
+    }
+
+    public AbstractMenu(@NotNull SlotPattern slotPattern, @NotNull String inventoryName, @Nullable Menu previousMenu) {
+        this.slotPattern = slotPattern;
+        this.inventory = slotPattern.createInventory(inventoryName);
         this.previousMenu = previousMenu;
     }
 

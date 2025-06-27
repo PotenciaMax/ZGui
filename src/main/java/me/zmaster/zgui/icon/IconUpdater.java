@@ -2,11 +2,15 @@ package me.zmaster.zgui.icon;
 
 import me.zmaster.zgui.menu.AbstractMenu;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class IconUpdater extends AbstractIconUpdater {
 
     private final AbstractMenu menu;
 
+    @NotNull
     @Override
     public AbstractMenu getMenu() {
         return menu;
@@ -22,7 +26,7 @@ public class IconUpdater extends AbstractIconUpdater {
         }
     }
 
-    public IconUpdater(AbstractMenu menu) {
-        this.menu = menu;
+    public IconUpdater(@NotNull AbstractMenu menu) {
+        this.menu = Objects.requireNonNull(menu, "menu cannot be null");
     }
 }

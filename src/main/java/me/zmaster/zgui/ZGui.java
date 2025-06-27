@@ -67,6 +67,7 @@ public class ZGui {
 
     private ZGui(Plugin plugin) {
         this.plugin = plugin;
+        Bukkit.getPluginManager().registerEvents(new GuiListener(), plugin);
     }
 
     public class GuiListener implements Listener {
@@ -133,5 +134,4 @@ public class ZGui {
             }
         }
     }
-
 }

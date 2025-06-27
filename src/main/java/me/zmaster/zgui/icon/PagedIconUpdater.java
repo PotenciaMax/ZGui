@@ -9,6 +9,9 @@ import java.util.Map;
 public class PagedIconUpdater extends AbstractIconUpdater {
 
     private final PagedMenu<?> menu;
+    private final Map<Integer, Icon> icons;
+    private final List<? extends Icon> pagedIcons;
+    private final Inventory inventory;
     private int page;
 
     @Override
@@ -25,8 +28,8 @@ public class PagedIconUpdater extends AbstractIconUpdater {
     }
 
     public void setPage(int page) {
-        if (page < 0) throw new IllegalStateException("page cannot be negative");
-        this.page = Math.min(page, getLastPage());
+        if (page < 1) throw new IndexOutOfBoundsException("page cannot be < 1");
+        this.page = page;
     }
 
     @Override
@@ -36,28 +39,23 @@ public class PagedIconUpdater extends AbstractIconUpdater {
             return;
         }
 
-        List<? extends Icon> pagedIcons = menu.getPagedIcons();
-
         int lastIconPos = pagedIcons.size() - 1;
         int startPos = pageSize * (page - 1);
         if (lastIconPos < startPos) {
             return;
         }
 
-        Inventory inv = menu.getInventory();
-        Map<Integer, Icon> icons = menu.getIcons();
-
         int lastPos = Math.min(pageSize * page - 1, lastIconPos);
         int position = startPos;
 
         for (int slot : getSlots()) {
-            Icon pagedIcon = pagedIcons.get(startPos);
-            icons.put(slot, pagedIcon);
-            inv.setItem(slot, pagedIcon.getItem());
-
-            if (position >= lastPos) {
-                break;
+            if (position > lastPos) {
+                setIcon(slot, null);
+                continue;
             }
+
+            Icon pagedIcon = pagedIcons.get(position);
+            setIcon(slot, pagedIcon);
 
             position++;
         }
@@ -65,5 +63,19 @@ public class PagedIconUpdater extends AbstractIconUpdater {
 
     public PagedIconUpdater(PagedMenu<?> menu) {
         this.menu = menu;
+        this.icons = menu.getIcons();
+        this.pagedIcons = menu.getPagedIcons();
+        this.inventory = menu.getInventory();
+    }
+
+    private void setIcon(int slot, Icon pagedIcon) {
+        if (pagedIcon == null) {
+            icons.remove(slot);
+            inventory.setItem(slot, null);
+            return;
+        }
+
+        icons.put(slot, pagedIcon);
+        inventory.setItem(slot, pagedIcon.getItem());
     }
 }

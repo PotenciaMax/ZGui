@@ -5,6 +5,8 @@ import me.zmaster.zgui.icon.IconMetadata;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -20,31 +22,43 @@ public final class MenuMetadata {
     private final Map<String, MethodHandle> iconMethods = new LinkedHashMap<>();
     private final Map<String, IconMetadata> iconMetas = new HashMap<>();
 
+    @NotNull
     public String getInventoryName() {
         return inventoryName;
     }
 
+    @NotNull
     public SlotPattern getSlotPattern() {
         return slotPattern;
     }
 
-    public Map<String, IconMetadata> putIcons(AbstractMenu menu) {
-        Map<String, IconMetadata> toApply = new HashMap<>(iconMetas);
+    @Nullable
+    public IconMetadata getIconMeta(String key) {
+        return iconMetas.get(key);
+    }
+
+    @NotNull
+    public Map<String, IconMetadata> applyIcons(AbstractMenu menu) {
+        Map<String, IconMetadata> notApplied = new HashMap<>(iconMetas);
 
         iconMethods.forEach((key, method) -> {
-            IconMetadata meta = toApply.remove(key);
+            IconMetadata meta = notApplied.remove(key);
 
             if (meta != null) try {
                 method.invoke(menu, meta);
 
             } catch (Throwable e) {
                 String menuName = menu.getClass().getSimpleName();
-                throw new RuntimeException(String.format("An exception occurred while adding icon %s to %s", key, menuName), e);
+                throw new RuntimeException(String.format("An exception occurred while applying icon %s in %s", key, menuName), e);
             }
         });
-        return toApply;
+
+        return notApplied;
     }
 
+    public void applyAllIcons(AbstractMenu menu) {
+        applyIcons(menu).values().forEach(m -> menu.putIcon(m.getSlot(), m::getDefaultItem));
+    }
 
     public MenuMetadata(YamlConfiguration file, Class<? extends AbstractMenu> menuClass) {
         String inventoryName = file.getString("name");
