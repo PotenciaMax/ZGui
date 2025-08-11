@@ -1,5 +1,6 @@
 package me.zmaster.zgui.menu;
 
+import me.zmaster.zgui.icon.Icon;
 import me.zmaster.zgui.icon.IconHandler;
 import me.zmaster.zgui.icon.IconMetadata;
 import org.bukkit.ChatColor;
@@ -45,7 +46,10 @@ public final class MenuMetadata {
             IconMetadata meta = notApplied.remove(key);
 
             if (meta != null) try {
-                method.invoke(menu, meta);
+                Icon icon = (Icon) method.invoke(menu, meta);
+                if (icon != null) {
+                    menu.putIcon(meta.getSlots(), icon);
+                }
 
             } catch (Throwable e) {
                 String menuName = menu.getClass().getSimpleName();
@@ -57,7 +61,7 @@ public final class MenuMetadata {
     }
 
     public void applyAllIcons(AbstractMenu menu) {
-        applyIcons(menu).values().forEach(m -> menu.putIcon(m.getSlot(), m::getDefaultItem));
+        applyIcons(menu).values().forEach(m -> menu.putIcon(m.getSlots(), m::getDefaultItem));
     }
 
     public MenuMetadata(YamlConfiguration file, Class<? extends AbstractMenu> menuClass) {
@@ -71,7 +75,7 @@ public final class MenuMetadata {
 
     private void initIconMethods(Class<?> menuClass) {
         Predicate<Method> filter = method -> method.isAnnotationPresent(IconHandler.class);
-        Comparator<Method> comp = Comparator.comparingInt(method -> method.getAnnotation(IconHandler.class).priority());
+        Comparator<Method> comp = Comparator.comparingInt(method -> method.getAnnotation(IconHandler.class).priority().ordinal());
 
         Arrays.stream(menuClass.getMethods())
                 .filter(filter)
@@ -93,7 +97,7 @@ public final class MenuMetadata {
         }
 
         for (String key : slotsSection.getKeys(false)) {
-            IconMetadata iconMetadata = new IconMetadata(file, key);
+            IconMetadata iconMetadata = new IconMetadata(file, key, slotPattern);
             iconMetas.put(key, iconMetadata);
         }
     }

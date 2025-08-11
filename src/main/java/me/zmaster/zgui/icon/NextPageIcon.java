@@ -1,7 +1,7 @@
 package me.zmaster.zgui.icon;
 
 import me.zmaster.zgui.menu.PagedMenu;
-import me.zmaster.zgui.util.MetaFormater;
+import me.zmaster.zgui.util.Formater;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -26,7 +26,7 @@ public class NextPageIcon implements Icon {
         }
 
         PagedIconUpdater pagedIconUpdater = menu.getPagedIconsUpdater();
-        MetaFormater formater = new MetaFormater(pagedIconUpdater.getPage(), pagedIconUpdater.getLastPage());
+        Formater formater = new Formater(pagedIconUpdater.getPage(), pagedIconUpdater.getLastPage());
         return formater.formatItem(item);
     }
 
@@ -42,7 +42,7 @@ public class NextPageIcon implements Icon {
 
         pageUpdater.setPage(nextPage);
         pageUpdater.update();
-        menu.getNextPageIconsUpdater().update();
+        menu.getIconsUpdater().update();
     }
 
     public NextPageIcon(IconMetadata meta, PagedMenu<?> menu, int pageDirection) {
@@ -52,7 +52,7 @@ public class NextPageIcon implements Icon {
         this.menu = menu;
         this.pageDirection = pageDirection;
 
-        menu.getNextPageIconsUpdater().addSlot(meta.getSlot());
+        menu.getIconsUpdater().addSlot(meta.getSlots());
     }
 
 }

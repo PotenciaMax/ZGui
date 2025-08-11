@@ -2,6 +2,7 @@ package me.zmaster.zgui.icon;
 
 import com.cryptomorin.xseries.SkullUtils;
 import com.cryptomorin.xseries.XMaterial;
+import me.zmaster.zgui.menu.SlotPattern;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -21,11 +22,11 @@ import java.util.Map;
 public final class IconMetadata {
 
     public static final String DEFAULT_STATE = "default";
-    private final char slot;
+    private final List<Integer> slots;
     private final Map<String, ItemStack> itemStates = new HashMap<>();
 
-    public char getSlot() {
-        return slot;
+    public List<Integer> getSlots() {
+        return slots;
     }
 
     @NotNull
@@ -43,8 +44,9 @@ public final class IconMetadata {
         return itemStates.getOrDefault(state, getDefaultItem());
     }
 
-    public IconMetadata(YamlConfiguration file, String key) {
-        this.slot = file.getString("slots." + key).charAt(0);
+    public IconMetadata(YamlConfiguration file, String key, SlotPattern slotPattern) {
+        String slot = file.getString("slots." + key);
+        this.slots = slotPattern.getSlotsByChar(slot);
 
         ConfigurationSection itemSection = file.getConfigurationSection("items." + key);
         if (itemSection != null) {

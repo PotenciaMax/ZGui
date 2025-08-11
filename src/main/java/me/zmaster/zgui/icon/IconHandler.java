@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IconHandler {
     String value();
-    int priority() default 0;
+    IconPriority priority() default IconPriority.MEDIUM;
 }

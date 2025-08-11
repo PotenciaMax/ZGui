@@ -1,5 +1,6 @@
 package me.zmaster.zgui.util;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -9,9 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MetaFormater {
+public class Formater {
 
-    private final Object[] placeholders;
+    private Object[] placeholders;
+
+    public void addPlaceholders(Object... placeholders) {
+        this.placeholders = ArrayUtils.addAll(this.placeholders, placeholders);
+    }
+
+    public String formatString(String str) {
+        return MessageFormat.format(str, placeholders);
+    }
 
     public ItemStack formatItem(@NotNull ItemStack item) {
         ItemStack formatedItem = Objects.requireNonNull(item, "item cannot be null").clone();
@@ -21,7 +30,7 @@ public class MetaFormater {
         List<String> lore = meta.getLore();
 
         if (meta.hasDisplayName()) {
-            meta.setDisplayName(MessageFormat.format(displayName, placeholders));
+            meta.setDisplayName(formatString(displayName));
         }
 
         if (lore != null) {
@@ -37,13 +46,13 @@ public class MetaFormater {
 
         List<String> formatedLore = new ArrayList<>(lore.size());
         for (String line : lore) {
-            formatedLore.add(MessageFormat.format(line, placeholders));
+            formatedLore.add(formatString(line));
         }
 
         return formatedLore;
     }
 
-    public MetaFormater(Object... placeholders) {
+    public Formater(Object... placeholders) {
         this.placeholders = placeholders;
     }
 

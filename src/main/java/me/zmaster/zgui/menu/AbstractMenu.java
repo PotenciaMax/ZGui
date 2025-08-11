@@ -14,21 +14,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractMenu implements Menu {
 
     private final Map<Integer, Icon> icons = new HashMap<>();
-    private final SlotPattern slotPattern;
     private final Inventory inventory;
     private final Menu previousMenu;
 
     public Map<Integer, Icon> getIcons() {
         return icons;
-    }
-
-    public SlotPattern getSlotPattern() {
-        return slotPattern;
     }
 
     public Inventory getInventory() {
@@ -51,16 +47,28 @@ public abstract class AbstractMenu implements Menu {
         previousMenu.open(player);
     }
 
-    public void putIcon(char caractere, Icon icon) {
-        putIcon(caractere, icon, true);
+    public void putIcon(@NotNull List<Integer> slots, @Nullable Icon icon) {
+        putIcon(slots, icon, true);
     }
 
-    public void putIcon(char caractere, Icon icon, boolean update) {
-        for (int slot : slotPattern.getSlotsByChar(caractere)) {
-            icons.put(slot, icon);
-            if (update) {
-                inventory.setItem(slot, icon.getItem());
+    public void putIcon(@NotNull List<Integer> slots, @Nullable Icon icon, boolean updateInventory) {
+        for (int slot : slots) {
+            putIcon(slot, icon, updateInventory);
+        }
+    }
+
+    public void putIcon(int slot, @Nullable Icon icon, boolean updateInventory) {
+        if (icon == null) {
+            icons.remove(slot);
+            if (updateInventory) {
+                inventory.setItem(slot, null);
             }
+            return;
+        }
+
+        icons.put(slot, icon);
+        if (updateInventory) {
+            inventory.setItem(slot, icon.getItem());
         }
     }
 
@@ -78,8 +86,8 @@ public abstract class AbstractMenu implements Menu {
     public void onClose(InventoryCloseEvent event) {}
 
     @IconHandler("close")
-    public void closeIcon(IconMetadata metadata) {
-        putIcon(metadata.getSlot(), new Icon() {
+    public Icon closeIcon(IconMetadata metadata) {
+        return new Icon() {
             @Override
             public ItemStack getItem() {
                 return metadata.getDefaultItem();
@@ -89,12 +97,12 @@ public abstract class AbstractMenu implements Menu {
             public void clickAction(InventoryClickEvent event) {
                 event.getWhoClicked().closeInventory();
             }
-        });
+        };
     }
 
     @IconHandler("previous")
-    public void previousIcon(IconMetadata metadata) {
-        putIcon(metadata.getSlot(), new Icon() {
+    public Icon previousIcon(IconMetadata metadata) {
+        return new Icon() {
             @Override
             public ItemStack getItem() {
                 if (previousMenu == null) {
@@ -107,17 +115,15 @@ public abstract class AbstractMenu implements Menu {
             public void clickAction(InventoryClickEvent event) {
                 openPrevious(event.getWhoClicked());
             }
-        });
+        };
     }
 
     public AbstractMenu(@NotNull MenuMetadata metadata, @Nullable Menu previousMenu) {
-        this.slotPattern = metadata.getSlotPattern();
-        this.inventory = slotPattern.createInventory(metadata.getInventoryName());
+        this.inventory = metadata.getSlotPattern().createInventory(metadata.getInventoryName());
         this.previousMenu = previousMenu;
     }
 
     public AbstractMenu(@NotNull SlotPattern slotPattern, @NotNull String inventoryName, @Nullable Menu previousMenu) {
-        this.slotPattern = slotPattern;
         this.inventory = slotPattern.createInventory(inventoryName);
         this.previousMenu = previousMenu;
     }

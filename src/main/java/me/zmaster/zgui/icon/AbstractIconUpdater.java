@@ -2,22 +2,23 @@ package me.zmaster.zgui.icon;
 
 import me.zmaster.zgui.menu.AbstractMenu;
 
-import java.util.TreeSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class AbstractIconUpdater {
 
-    private final TreeSet<Integer> slots = new TreeSet<>();
+    private final List<Integer> slots = new LinkedList<>();
 
-    public TreeSet<Integer> getSlots() {
+    public List<Integer> getSlots() {
         return slots;
     }
 
-    public void addSlot(char... slot) {
-        slots.addAll(getMenu().getSlotPattern().getSlotsByChar(slot));
+    public void addSlot(List<Integer> slots) {
+        this.slots.addAll(slots);
     }
 
-    public void removeSlot(char... slot) {
-        slots.removeAll(getMenu().getSlotPattern().getSlotsByChar(slot));
+    public void removeSlot(List<Integer> slots) {
+        this.slots.addAll(slots);
     }
 
     public abstract AbstractMenu getMenu();

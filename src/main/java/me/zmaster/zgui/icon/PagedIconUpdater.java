@@ -1,18 +1,14 @@
 package me.zmaster.zgui.icon;
 
 import me.zmaster.zgui.menu.PagedMenu;
-import org.bukkit.inventory.Inventory;
 
 import java.util.List;
-import java.util.Map;
 
 public class PagedIconUpdater extends AbstractIconUpdater {
 
     private final PagedMenu<?> menu;
-    private final Map<Integer, Icon> icons;
     private final List<? extends Icon> pagedIcons;
-    private final Inventory inventory;
-    private int page;
+    private int page = 1;
 
     @Override
     public PagedMenu<?> getMenu() {
@@ -50,12 +46,12 @@ public class PagedIconUpdater extends AbstractIconUpdater {
 
         for (int slot : getSlots()) {
             if (position > lastPos) {
-                setIcon(slot, null);
+                menu.putIcon(slot, null, true);
                 continue;
             }
 
             Icon pagedIcon = pagedIcons.get(position);
-            setIcon(slot, pagedIcon);
+            menu.putIcon(slot, pagedIcon, true);
 
             position++;
         }
@@ -63,19 +59,7 @@ public class PagedIconUpdater extends AbstractIconUpdater {
 
     public PagedIconUpdater(PagedMenu<?> menu) {
         this.menu = menu;
-        this.icons = menu.getIcons();
         this.pagedIcons = menu.getPagedIcons();
-        this.inventory = menu.getInventory();
     }
 
-    private void setIcon(int slot, Icon pagedIcon) {
-        if (pagedIcon == null) {
-            icons.remove(slot);
-            inventory.setItem(slot, null);
-            return;
-        }
-
-        icons.put(slot, pagedIcon);
-        inventory.setItem(slot, pagedIcon.getItem());
-    }
 }
