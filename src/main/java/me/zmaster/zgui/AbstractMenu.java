@@ -1,9 +1,11 @@
-package me.zmaster.zgui.menu;
+package me.zmaster.zgui;
 
-import me.zmaster.zgui.ZGui;
 import me.zmaster.zgui.icon.Icon;
 import me.zmaster.zgui.icon.IconHandler;
 import me.zmaster.zgui.icon.IconMetadata;
+import me.zmaster.zgui.menu.Menu;
+import me.zmaster.zgui.menu.MenuMetadata;
+import me.zmaster.zgui.menu.SlotPattern;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -72,7 +74,7 @@ public abstract class AbstractMenu implements Menu {
         }
     }
 
-    public void onClick(InventoryClickEvent event) {
+    protected void onClick(InventoryClickEvent event) {
         if (inventory.equals(event.getClickedInventory())) {
             Icon icon = icons.get(event.getSlot());
             if (icon != null) {
@@ -81,9 +83,9 @@ public abstract class AbstractMenu implements Menu {
         }
     }
 
-    public void onOpen(InventoryOpenEvent event) {}
+    protected void onOpen(InventoryOpenEvent event) {}
 
-    public void onClose(InventoryCloseEvent event) {}
+    protected void onClose(InventoryCloseEvent event) {}
 
     @IconHandler("close")
     public Icon closeIcon(IconMetadata metadata) {
