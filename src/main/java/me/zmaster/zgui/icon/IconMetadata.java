@@ -1,5 +1,10 @@
 package me.zmaster.zgui.icon;
 
+import com.cryptomorin.xseries.XBlock;
+import com.cryptomorin.xseries.XMaterial;
+import com.cryptomorin.xseries.profiles.builder.XSkull;
+import com.cryptomorin.xseries.profiles.objects.ProfileInputType;
+import com.cryptomorin.xseries.profiles.objects.Profileable;
 import me.zmaster.zgui.menu.SlotPattern;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -109,10 +114,13 @@ public final class IconMetadata {
 
     private ItemStack buildItem(ConfigurationSection section) {
         String materialName = section.getString("type", "STONE");
-        Material material = Material.valueOf(materialName);
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
+        XMaterial material = XMaterial.matchXMaterial(materialName).orElse(XMaterial.STONE);
+        ItemStack item = material.parseItem();
+        if (item == null) {
+            item = new ItemStack(Material.STONE);
+        }
 
+        ItemMeta meta = item.getItemMeta();
         String displayName = section.getString("name");
         if (displayName != null) {
             meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
@@ -120,9 +128,17 @@ public final class IconMetadata {
 
         List<String> lore = section.getStringList("lore");
         if (!lore.isEmpty()) {
-            List<String> coloredLore = new ArrayList<>();
-            lore.forEach(text -> coloredLore.add(ChatColor.translateAlternateColorCodes('&', text)));
+            List<String> coloredLore = new ArrayList();
+            lore.forEach((text) -> {
+                coloredLore.add(ChatColor.translateAlternateColorCodes('&', text));
+            });
             meta.setLore(coloredLore);
+        }
+
+        String base64 = section.getString("base64");
+        if (base64 != null && material == XMaterial.PLAYER_HEAD) {
+            Profileable profileable = Profileable.of(ProfileInputType.BASE64, base64);
+            meta = XSkull.of(meta).profile(profileable).apply();
         }
 
         if (section.getBoolean("glow")) {
