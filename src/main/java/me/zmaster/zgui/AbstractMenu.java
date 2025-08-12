@@ -49,16 +49,36 @@ public abstract class AbstractMenu implements Menu {
         previousMenu.open(player);
     }
 
+    /**
+     * Adds or replaces an icon in multiple slots.
+     *
+     * @param slots           the list of slots to update
+     * @param icon            the icon to place (null to remove)
+     */
     public void putIcon(@NotNull List<Integer> slots, @Nullable Icon icon) {
         putIcon(slots, icon, true);
     }
 
+    /**
+     * Adds or replaces an icon in multiple slots, optionally updating the inventory immediately.
+     *
+     * @param slots            the list of slots to update
+     * @param icon             the icon to place (null to remove)
+     * @param updateInventory  whether to update the Bukkit inventory immediately
+     */
     public void putIcon(@NotNull List<Integer> slots, @Nullable Icon icon, boolean updateInventory) {
         for (int slot : slots) {
             putIcon(slot, icon, updateInventory);
         }
     }
 
+    /**
+     * Adds or replaces an icon in a specific slot, optionally updating the inventory immediately.
+     *
+     * @param slot             the slot index to update
+     * @param icon             the icon to place (null to remove)
+     * @param updateInventory  whether to update the Bukkit inventory immediately
+     */
     public void putIcon(int slot, @Nullable Icon icon, boolean updateInventory) {
         if (icon == null) {
             icons.remove(slot);
@@ -74,6 +94,12 @@ public abstract class AbstractMenu implements Menu {
         }
     }
 
+    /**
+     * Called when the inventory receives a click event.
+     * Handles the icon click actions if the clicked slot has an icon.
+     *
+     * @param event the inventory click event
+     */
     protected void onClick(InventoryClickEvent event) {
         if (inventory.equals(event.getClickedInventory())) {
             Icon icon = icons.get(event.getSlot());
@@ -83,8 +109,20 @@ public abstract class AbstractMenu implements Menu {
         }
     }
 
+    /**
+     * Called when the inventory is opened.
+     * Override to add custom behavior on menu open.
+     *
+     * @param event the inventory open event
+     */
     protected void onOpen(InventoryOpenEvent event) {}
 
+    /**
+     * Called when the inventory is closed.
+     * Override to add custom behavior on menu close.
+     *
+     * @param event the inventory close event
+     */
     protected void onClose(InventoryCloseEvent event) {}
 
     @IconHandler("close")
@@ -120,11 +158,24 @@ public abstract class AbstractMenu implements Menu {
         };
     }
 
+    /**
+     * Constructor that creates the menu inventory based on metadata.
+     *
+     * @param metadata     the metadata describing menu configuration
+     * @param previousMenu the previous menu, can be null
+     */
     public AbstractMenu(@NotNull MenuMetadata metadata, @Nullable Menu previousMenu) {
         this.inventory = metadata.getSlotPattern().createInventory(metadata.getInventoryName());
         this.previousMenu = previousMenu;
     }
 
+    /**
+     * Constructor that creates the menu inventory based on slot pattern and name.
+     *
+     * @param slotPattern   the slot pattern to use for inventory layout
+     * @param inventoryName the title of the inventory
+     * @param previousMenu  the previous menu, can be null
+     */
     public AbstractMenu(@NotNull SlotPattern slotPattern, @NotNull String inventoryName, @Nullable Menu previousMenu) {
         this.inventory = slotPattern.createInventory(inventoryName);
         this.previousMenu = previousMenu;

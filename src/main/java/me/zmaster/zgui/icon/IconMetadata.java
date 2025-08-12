@@ -5,7 +5,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -20,24 +19,51 @@ import java.util.Map;
 
 public final class IconMetadata {
 
+    /**
+     * The default state key for icons without specific states.
+     */
     public static final String DEFAULT_STATE = "default";
+
     private final List<Integer> slots;
     private final Map<String, ItemStack> itemStates = new HashMap<>();
 
+    /**
+     * Returns the list of inventory slot indices where this icon should be placed.
+     *
+     * @return list of slot indices
+     */
     public List<Integer> getSlots() {
         return slots;
     }
 
+    /**
+     * Returns a map of all item states associated with this icon.
+     * Each key corresponds to a state name and maps to an ItemStack.
+     *
+     * @return map of state names to ItemStacks
+     */
     @NotNull
     public Map<String, ItemStack> getItems() {
         return itemStates;
     }
 
+    /**
+     * Returns the default ItemStack for this icon, or null if not set.
+     *
+     * @return default ItemStack or null
+     */
     @Nullable
     public ItemStack getDefaultItem() {
         return itemStates.get(DEFAULT_STATE);
     }
 
+    /**
+     * Returns the ItemStack for the specified state if present,
+     * otherwise returns the default ItemStack.
+     *
+     * @param state the state name
+     * @return the ItemStack for the state or default if absent
+     */
     @Nullable
     public ItemStack getItemOrDefault(String state) {
         return itemStates.getOrDefault(state, getDefaultItem());

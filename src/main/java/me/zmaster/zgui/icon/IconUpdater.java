@@ -1,6 +1,6 @@
 package me.zmaster.zgui.icon;
 
-import me.zmaster.zgui.menu.AbstractMenu;
+import me.zmaster.zgui.AbstractMenu;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 

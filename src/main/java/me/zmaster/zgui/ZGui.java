@@ -1,6 +1,5 @@
 package me.zmaster.zgui;
 
-import me.zmaster.zgui.menu.AbstractMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +22,12 @@ public class ZGui {
     private final Plugin plugin;
     private final Map<Inventory, AbstractMenu> registeredInventories = new HashMap<>();
 
+    /**
+     * Returns the singleton instance of ZGui.
+     * Throws IllegalStateException if called before initialization.
+     *
+     * @return the ZGui instance
+     */
     public static ZGui get() {
         if (instance == null) {
             throw new IllegalStateException("The ZGui instance is not initialized");
@@ -30,24 +35,51 @@ public class ZGui {
         return instance;
     }
 
+    /**
+     * Initializes the singleton instance of ZGui with the given plugin.
+     *
+     * @param plugin the plugin instance used by ZGui
+     */
     public static void initialize(Plugin plugin) {
         instance = new ZGui(plugin);
     }
 
+    /**
+     * Returns a collection of all currently registered menus.
+     *
+     * @return a collection of AbstractMenu objects
+     */
     public Collection<AbstractMenu> getRegisteredMenus() {
         return registeredInventories.values();
     }
 
+    /**
+     * Returns the menu registered for the specified inventory, or null if none.
+     *
+     * @param inventory the inventory to look up
+     * @return the registered AbstractMenu or null if not found
+     */
     public  AbstractMenu getRegisteredMenu(Inventory inventory) {
         return registeredInventories.get(inventory);
     }
 
+    /**
+     * Registers a menu associated with an inventory if no viewers are currently viewing it.
+     *
+     * @param inv  the inventory to register
+     * @param menu the menu associated with the inventory
+     */
     public void registerMenu(Inventory inv, AbstractMenu menu) {
         if (inv.getViewers().isEmpty()) {
             registeredInventories.put(inv, menu);
         }
     }
 
+    /**
+     * Unregisters the given menu if the associated inventory has at most one viewer.
+     *
+     * @param gui the AbstractMenu to unregister
+     */
     public void unregisterMenu(AbstractMenu gui) {
         Inventory inventory = gui.getInventory();
         if (inventory.getViewers().size() <= 1) {
@@ -55,6 +87,9 @@ public class ZGui {
         }
     }
 
+    /**
+     * Unregisters all menus and closes inventories for all online players who have a registered menu open.
+     */
     public void unregisterMenus() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             Inventory openInv = player.getOpenInventory().getTopInventory();
@@ -67,10 +102,10 @@ public class ZGui {
 
     private ZGui(Plugin plugin) {
         this.plugin = plugin;
-        Bukkit.getPluginManager().registerEvents(new GuiListener(), plugin);
+        Bukkit.getPluginManager().registerEvents(new MenuListener(), plugin);
     }
 
-    public class GuiListener implements Listener {
+    public class MenuListener implements Listener {
 
         @EventHandler
         public void openListener(InventoryOpenEvent event) {

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'me.zmaster'
-version = 'v1.2.0'
+version = '1.2.0'
 
 repositories {
     mavenCentral()
@@ -18,7 +18,7 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             from components.java
         }
     }

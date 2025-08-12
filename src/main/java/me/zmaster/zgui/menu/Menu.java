@@ -4,18 +4,17 @@ import org.bukkit.entity.HumanEntity;
 
 public interface Menu {
     /**
-     * Open the menu for the player.
+     * Opens this menu for the specified player.
      *
-     * @param player ...
+     * @param player the player to open the menu for
      */
     void open(HumanEntity player);
 
     /**
-     * Open the previous menu for the player.
-     * If theirs not a previous menu closes the
-     * menu.
+     * Opens the previous menu for the player if it exists;
+     * otherwise, closes the inventory.
      *
-     * @param player ...
+     * @param player the player to open the previous menu for
      */
     void openPrevious(HumanEntity player);
 }

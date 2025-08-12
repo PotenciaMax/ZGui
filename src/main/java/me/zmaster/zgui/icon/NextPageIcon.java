@@ -42,7 +42,7 @@ public class NextPageIcon implements Icon {
 
         pageUpdater.setPage(nextPage);
         pageUpdater.update();
-        menu.getIconsUpdater().update();
+        menu.getNavigationIconsUpdater().update();
     }
 
     public NextPageIcon(IconMetadata meta, PagedMenu<?> menu, int pageDirection) {
@@ -52,7 +52,6 @@ public class NextPageIcon implements Icon {
         this.menu = menu;
         this.pageDirection = pageDirection;
 
-        menu.getIconsUpdater().addSlot(meta.getSlots());
+        menu.getNavigationIconsUpdater().addSlot(meta.getSlots());
     }
-
 }

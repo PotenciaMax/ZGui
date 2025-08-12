@@ -15,19 +15,33 @@ public class PagedIconUpdater extends AbstractIconUpdater {
         return menu;
     }
 
+    /**
+     * Returns the current page number.
+     */
     public int getPage() {
         return page;
     }
 
+    /**
+     * Calculates and returns the last page number based on the total icons and slots available.
+     */
     public int getLastPage() {
         return menu.getIcons().size() / getSlots().size();
     }
 
+    /**
+     * Sets the current page number.
+     * @param page the new page number, must be >= 1
+     * @throws IndexOutOfBoundsException if page < 1
+     */
     public void setPage(int page) {
         if (page < 1) throw new IndexOutOfBoundsException("page cannot be < 1");
         this.page = page;
     }
 
+    /**
+     * Updates the icons on the current page in the menu.
+     */
     @Override
     public void update() {
         int pageSize = getSlots().size();
