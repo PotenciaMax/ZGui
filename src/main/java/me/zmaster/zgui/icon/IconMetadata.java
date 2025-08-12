@@ -1,10 +1,5 @@
 package me.zmaster.zgui.icon;
 
-import com.cryptomorin.xseries.XBlock;
-import com.cryptomorin.xseries.XMaterial;
-import com.cryptomorin.xseries.profiles.builder.XSkull;
-import com.cryptomorin.xseries.profiles.objects.ProfileInputType;
-import com.cryptomorin.xseries.profiles.objects.Profileable;
 import me.zmaster.zgui.menu.SlotPattern;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -114,11 +109,7 @@ public final class IconMetadata {
 
     private ItemStack buildItem(ConfigurationSection section) {
         String materialName = section.getString("type", "STONE");
-        XMaterial material = XMaterial.matchXMaterial(materialName).orElse(XMaterial.STONE);
-        ItemStack item = material.parseItem();
-        if (item == null) {
-            item = new ItemStack(Material.STONE);
-        }
+        ItemStack item = new ItemStack(Material.valueOf(materialName));
 
         ItemMeta meta = item.getItemMeta();
         String displayName = section.getString("name");
@@ -133,12 +124,6 @@ public final class IconMetadata {
                 coloredLore.add(ChatColor.translateAlternateColorCodes('&', text));
             });
             meta.setLore(coloredLore);
-        }
-
-        String base64 = section.getString("base64");
-        if (base64 != null && material == XMaterial.PLAYER_HEAD) {
-            Profileable profileable = Profileable.of(ProfileInputType.BASE64, base64);
-            meta = XSkull.of(meta).profile(profileable).apply();
         }
 
         if (section.getBoolean("glow")) {
