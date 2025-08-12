@@ -7,7 +7,6 @@ import me.zmaster.zgui.icon.IconMetadata;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,7 +65,7 @@ public final class MenuMetadata {
         applyIcons(menu).values().forEach(m -> menu.putIcon(m.getSlots(), m::getDefaultItem));
     }
 
-    public MenuMetadata(YamlConfiguration file, Class<? extends AbstractMenu> menuClass) {
+    public MenuMetadata(FileConfiguration file, Class<? extends AbstractMenu> menuClass) {
         String inventoryName = file.getString("name");
         this.inventoryName = inventoryName == null ? "" : ChatColor.translateAlternateColorCodes('&', inventoryName);
         this.slotPattern = new SlotPattern(file.getStringList("slot_pattern"));
