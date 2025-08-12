@@ -4,6 +4,7 @@ import me.zmaster.zgui.menu.SlotPattern;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -42,7 +43,7 @@ public final class IconMetadata {
         return itemStates.getOrDefault(state, getDefaultItem());
     }
 
-    public IconMetadata(YamlConfiguration file, String key, SlotPattern slotPattern) {
+    public IconMetadata(FileConfiguration file, String key, SlotPattern slotPattern) {
         String slot = file.getString("slots." + key);
         this.slots = slotPattern.getSlotsByChar(slot);
 

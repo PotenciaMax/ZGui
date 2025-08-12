@@ -1,10 +1,12 @@
 package me.zmaster.zgui.menu;
 
+import me.zmaster.zgui.AbstractMenu;
 import me.zmaster.zgui.icon.Icon;
 import me.zmaster.zgui.icon.IconHandler;
 import me.zmaster.zgui.icon.IconMetadata;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -90,7 +92,7 @@ public final class MenuMetadata {
                 });
     }
 
-    private void initIconMetas(YamlConfiguration file) {
+    private void initIconMetas(FileConfiguration file) {
         ConfigurationSection slotsSection = file.getConfigurationSection("slots");
         if (slotsSection == null) {
             return;
