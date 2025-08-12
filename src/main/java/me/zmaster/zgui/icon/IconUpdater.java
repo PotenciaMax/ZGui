@@ -6,6 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Implementation of AbstractIconUpdater that updates static icons in a menu.
+ * It iterates over the assigned slots and refreshes the items in the inventory
+ * based on the current icon data stored in the menu.
+ */
 public class IconUpdater extends AbstractIconUpdater {
 
     private final AbstractMenu menu;

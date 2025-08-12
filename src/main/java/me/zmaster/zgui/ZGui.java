@@ -16,6 +16,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Singleton class responsible for managing and registering menus (GUIs) in the plugin.
+ * <p>
+ * It keeps track of registered menus linked to their inventories,
+ * handles menu registration, unregistration, and event listener registration.
+ * Ensures only one instance exists during the plugin lifecycle.
+ */
 public class ZGui {
 
     private static ZGui instance;

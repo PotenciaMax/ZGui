@@ -5,6 +5,13 @@ import me.zmaster.zgui.AbstractMenu;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Abstract base class responsible for managing and updating icons within a menu.
+ * It maintains a list of inventory slots that should be updated and defines
+ * the contract for subclasses to specify the menu and update logic.
+ * <p>
+ * Subclasses must implement how the icons are applied to the menu inventory.
+ */
 public abstract class AbstractIconUpdater {
 
     private final List<Integer> slots = new LinkedList<>();

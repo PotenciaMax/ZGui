@@ -5,6 +5,11 @@ import me.zmaster.zgui.util.Formater;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Represents a navigation icon used in paged menus to move between pages.
+ * Handles displaying the icon item based on whether the next/previous page
+ * is available and processes click events to update the current page.
+ */
 public class NextPageIcon implements Icon {
 
     public static int NEXT_PAGE_DIRECTION = 1;

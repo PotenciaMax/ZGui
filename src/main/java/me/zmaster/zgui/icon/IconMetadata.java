@@ -17,6 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents metadata for a menu icon, including its assigned slots
+ * and multiple item states (such as default and custom states).
+ * Responsible for loading icon configuration from a YAML file and
+ * building the corresponding ItemStack representations.
+ */
 public final class IconMetadata {
 
     /**

@@ -9,6 +9,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * A menu implementation that supports pagination of icons.
+ * <p>
+ * This menu manages a list of paged icons and provides
+ * functionality to navigate between pages using next and previous page icons.
+ * It uses separate updaters to refresh navigation icons and paged icons specifically.
+ */
 public class PagedMenu<I extends Icon> extends AbstractMenu {
 
     private final List<I> pagedIcons = new ArrayList<>();

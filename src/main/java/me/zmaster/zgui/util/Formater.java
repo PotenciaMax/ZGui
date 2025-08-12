@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Utility class for formatting strings and item metadata with placeholders.
+ */
 public class Formater {
 
     private Object[] placeholders;

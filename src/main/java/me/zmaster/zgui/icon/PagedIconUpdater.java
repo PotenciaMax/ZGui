@@ -4,6 +4,11 @@ import me.zmaster.zgui.menu.PagedMenu;
 
 import java.util.List;
 
+/**
+ * Icon updater specialized for paged menus.
+ * It manages the display of icons across multiple pages by updating
+ * only the icons visible on the current page.
+ */
 public class PagedIconUpdater extends AbstractIconUpdater {
 
     private final PagedMenu<?> menu;

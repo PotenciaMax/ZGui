@@ -19,6 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Base implementation of the Menu interface representing a GUI menu.
+ * <p>
+ * Handles inventory management, icon placement, and navigation between menus.
+ * Provides default implementations for opening, closing, and handling clicks in the menu.
+ */
 public abstract class AbstractMenu implements Menu {
 
     private final Map<Integer, Icon> icons = new HashMap<>();

@@ -2,6 +2,10 @@ package me.zmaster.zgui.menu;
 
 import org.bukkit.entity.HumanEntity;
 
+/**
+ * Represents a generic menu in the GUI system.
+ * Provides methods to open this menu / previous for a player.
+ */
 public interface Menu {
     /**
      * Opens this menu for the specified player.
