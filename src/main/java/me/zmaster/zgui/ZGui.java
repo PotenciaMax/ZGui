@@ -4,13 +4,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,8 +28,9 @@ import java.util.Map;
  */
 public class ZGui {
 
-    private static ZGui instance;
-    private final Plugin plugin;
+    private static final Plugin plugin = JavaPlugin.getProvidingPlugin(ZGui.class);
+    private static final ZGui instance = new ZGui(plugin);
+
     private final Map<Inventory, AbstractMenu> registeredInventories = new HashMap<>();
 
     /**
@@ -40,15 +44,6 @@ public class ZGui {
             throw new IllegalStateException("The ZGui instance is not initialized");
         }
         return instance;
-    }
-
-    /**
-     * Initializes the singleton instance of ZGui with the given plugin.
-     *
-     * @param plugin the plugin instance used by ZGui
-     */
-    public static void initialize(Plugin plugin) {
-        instance = new ZGui(plugin);
     }
 
     /**
@@ -66,32 +61,26 @@ public class ZGui {
      * @param inventory the inventory to look up
      * @return the registered AbstractMenu or null if not found
      */
-    public  AbstractMenu getRegisteredMenu(Inventory inventory) {
+    public AbstractMenu getRegisteredMenu(Inventory inventory) {
         return registeredInventories.get(inventory);
     }
 
     /**
-     * Registers a menu associated with an inventory if no viewers are currently viewing it.
+     * Registers a menu associated with an inventory.
      *
-     * @param inv  the inventory to register
      * @param menu the menu associated with the inventory
      */
-    public void registerMenu(Inventory inv, AbstractMenu menu) {
-        if (inv.getViewers().isEmpty()) {
-            registeredInventories.put(inv, menu);
-        }
+    public void registerMenu(AbstractMenu menu) {
+        registeredInventories.put(menu.inventory, menu);
     }
 
     /**
      * Unregisters the given menu if the associated inventory has at most one viewer.
      *
-     * @param gui the AbstractMenu to unregister
+     * @param menu the AbstractMenu to unregister
      */
-    public void unregisterMenu(AbstractMenu gui) {
-        Inventory inventory = gui.getInventory();
-        if (inventory.getViewers().size() <= 1) {
-            registeredInventories.remove(inventory);
-        }
+    public void unregisterMenu(AbstractMenu menu) {
+        registeredInventories.remove(menu.inventory);
     }
 
     /**
@@ -108,7 +97,6 @@ public class ZGui {
     }
 
     private ZGui(Plugin plugin) {
-        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(new MenuListener(), plugin);
     }
 
@@ -133,10 +121,11 @@ public class ZGui {
                 return;
             }
 
-            unregisterMenu(menu);
-
             // The onClose will be executed after the inventory is already closed to avoid bugs
-            Bukkit.getScheduler().runTask(plugin, () -> menu.onClose(event));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                menu.onClose(event);
+                if (menu.inventory.getViewers().isEmpty()) unregisterMenu(menu);
+            });
         }
 
 
@@ -172,7 +161,6 @@ public class ZGui {
         public void onPluginDisable(PluginDisableEvent event) {
             if (plugin.equals(event.getPlugin())) {
                 unregisterMenus();
-                instance = null;
             }
         }
     }

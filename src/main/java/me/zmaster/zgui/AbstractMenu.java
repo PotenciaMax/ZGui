@@ -1,23 +1,24 @@
 package me.zmaster.zgui;
 
-import me.zmaster.zgui.icon.Icon;
-import me.zmaster.zgui.icon.IconHandler;
-import me.zmaster.zgui.icon.IconMetadata;
-import me.zmaster.zgui.menu.Menu;
-import me.zmaster.zgui.menu.MenuMetadata;
-import me.zmaster.zgui.menu.SlotPattern;
+import me.zmaster.zgui.element.Element;
+import me.zmaster.zgui.element.Icon;
+import me.zmaster.zgui.meta.ElementMeta;
+import me.zmaster.zgui.meta.MenuMeta;
+import me.zmaster.zgui.meta.data.ItemData;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Base implementation of the Menu interface representing a GUI menu.
@@ -27,77 +28,49 @@ import java.util.Map;
  */
 public abstract class AbstractMenu implements Menu {
 
-    private final Map<Integer, Icon> icons = new HashMap<>();
-    private final Inventory inventory;
+    private final MenuMeta metadata;
+    private final Set<String> appliedElementMetas = new HashSet<>();
     private final Menu previousMenu;
+    final Inventory inventory;
+    final Map<Integer, Element> elements = new HashMap<>();
 
-    public Map<Integer, Icon> getIcons() {
-        return icons;
+    /**
+     * Constructor that creates the menu inventory based on metadata.
+     *
+     * @param metadata     the metadata describing menu configuration
+     * @param previousMenu the previous menu, can be null
+     */
+    public AbstractMenu(@NotNull MenuMeta metadata, @NotNull String inventoryName, @Nullable Menu previousMenu) {
+        this.metadata = metadata;
+        this.inventory = metadata.createInventory(inventoryName);
+        this.previousMenu = previousMenu;
+
+        applyElement("close", meta -> Icon.from(meta.getDefaultItem(), click -> click.getWhoClicked().closeInventory()));
+        applyElement("previous", this::previousIcon);
     }
 
-    public Inventory getInventory() {
-        return inventory;
+    public AbstractMenu(@NotNull MenuMeta metadata, @Nullable Menu previousMenu) {
+        this(metadata, metadata.getInventoryName(), previousMenu);
+    }
+
+    public MenuMeta getMetadata() {
+        return metadata;
+    }
+
+    @Override
+    public Slot getSlot(int index) {
+        return new Slot(this, index);
     }
 
     @Override
     public void open(HumanEntity player) {
-        ZGui.get().registerMenu(inventory, this);
+        ZGui.get().registerMenu(this);
         player.openInventory(inventory);
     }
 
     @Override
     public void openPrevious(HumanEntity player) {
-        if (previousMenu == null) {
-            player.closeInventory();
-            return;
-        }
-
-        previousMenu.open(player);
-    }
-
-    /**
-     * Adds or replaces an icon in multiple slots.
-     *
-     * @param slots           the list of slots to update
-     * @param icon            the icon to place (null to remove)
-     */
-    public void putIcon(@NotNull List<Integer> slots, @Nullable Icon icon) {
-        putIcon(slots, icon, true);
-    }
-
-    /**
-     * Adds or replaces an icon in multiple slots, optionally updating the inventory immediately.
-     *
-     * @param slots            the list of slots to update
-     * @param icon             the icon to place (null to remove)
-     * @param updateInventory  whether to update the Bukkit inventory immediately
-     */
-    public void putIcon(@NotNull List<Integer> slots, @Nullable Icon icon, boolean updateInventory) {
-        for (int slot : slots) {
-            putIcon(slot, icon, updateInventory);
-        }
-    }
-
-    /**
-     * Adds or replaces an icon in a specific slot, optionally updating the inventory immediately.
-     *
-     * @param slot             the slot index to update
-     * @param icon             the icon to place (null to remove)
-     * @param updateInventory  whether to update the Bukkit inventory immediately
-     */
-    public void putIcon(int slot, @Nullable Icon icon, boolean updateInventory) {
-        if (icon == null) {
-            icons.remove(slot);
-            if (updateInventory) {
-                inventory.setItem(slot, null);
-            }
-            return;
-        }
-
-        icons.put(slot, icon);
-        if (updateInventory) {
-            inventory.setItem(slot, icon.getItem());
-        }
+        if (previousMenu != null) previousMenu.open(player);
     }
 
     /**
@@ -108,9 +81,9 @@ public abstract class AbstractMenu implements Menu {
      */
     protected void onClick(InventoryClickEvent event) {
         if (inventory.equals(event.getClickedInventory())) {
-            Icon icon = icons.get(event.getSlot());
-            if (icon != null) {
-                icon.clickAction(event);
+            Element element = elements.get(event.getSlot());
+            if (element != null) {
+                element.onClick(event);
             }
         }
     }
@@ -131,60 +104,41 @@ public abstract class AbstractMenu implements Menu {
      */
     protected void onClose(InventoryCloseEvent event) {}
 
-    @IconHandler("close")
-    public Icon closeIcon(IconMetadata metadata) {
-        return new Icon() {
-            @Override
-            public ItemStack getItem() {
-                return metadata.getDefaultItem();
-            }
-
-            @Override
-            public void clickAction(InventoryClickEvent event) {
-                event.getWhoClicked().closeInventory();
-            }
-        };
+    protected void applyElement(String key, Function<ElementMeta, Element> factory) {
+        applyElement(key, factory, true);
     }
 
-    @IconHandler("previous")
-    public Icon previousIcon(IconMetadata metadata) {
-        return new Icon() {
-            @Override
-            public ItemStack getItem() {
-                if (previousMenu == null) {
-                    return metadata.getItems().get("close");
-                }
-                return metadata.getDefaultItem();
-            }
+    protected void applyElement(String key, Function<ElementMeta, Element> factory, boolean render) {
+        ElementMeta meta = metadata.getElementMeta(key);
+        if (meta == null) return;
 
-            @Override
-            public void clickAction(InventoryClickEvent event) {
-                openPrevious(event.getWhoClicked());
-            }
-        };
+        Element element = factory.apply(meta);
+        if (element == null) return;
+
+        for (int index : meta.getSlots()) {
+            getSlot(index).setElement(element, render);
+        }
+
+        appliedElementMetas.add(key);
     }
 
-    /**
-     * Constructor that creates the menu inventory based on metadata.
-     *
-     * @param metadata     the metadata describing menu configuration
-     * @param previousMenu the previous menu, can be null
-     */
-    public AbstractMenu(@NotNull MenuMetadata metadata, @Nullable Menu previousMenu) {
-        this.inventory = metadata.getSlotPattern().createInventory(metadata.getInventoryName());
-        this.previousMenu = previousMenu;
+    protected void readMeta(String key, Consumer<ElementMeta> consumer) {
+        ElementMeta meta = metadata.getElementMeta(key);
+        if (meta == null) return;
+
+        consumer.accept(meta);
+        appliedElementMetas.add(key);
     }
 
-    /**
-     * Constructor that creates the menu inventory based on slot pattern and name.
-     *
-     * @param slotPattern   the slot pattern to use for inventory layout
-     * @param inventoryName the title of the inventory
-     * @param previousMenu  the previous menu, can be null
-     */
-    public AbstractMenu(@NotNull SlotPattern slotPattern, @NotNull String inventoryName, @Nullable Menu previousMenu) {
-        this.inventory = slotPattern.createInventory(inventoryName);
-        this.previousMenu = previousMenu;
+    protected void applyStaticIcons() {
+        metadata.getElementMetas().forEach((key, meta) -> {
+            if (appliedElementMetas.contains(key)) return;
+            meta.getSlots().forEach(index -> getSlot(index).setItem(meta.getDefaultItem()));
+        });
     }
 
+    private Icon previousIcon(ElementMeta iconMeta) {
+        return Icon.from(iconMeta.getItem(previousMenu == null ? "not_previous" : ItemData.DEFAULT_STATE), click ->
+                openPrevious(click.getWhoClicked()));
+    }
 }

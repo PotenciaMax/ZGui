@@ -1,4 +1,4 @@
-package me.zmaster.zgui.menu;
+package me.zmaster.zgui;
 
 import org.bukkit.entity.HumanEntity;
 
@@ -7,6 +7,9 @@ import org.bukkit.entity.HumanEntity;
  * Provides methods to open this menu / previous for a player.
  */
 public interface Menu {
+
+    Slot getSlot(int index);
+
     /**
      * Opens this menu for the specified player.
      *

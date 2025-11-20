@@ -1,10 +1,13 @@
-package me.zmaster.zgui.icon;
+package me.zmaster.zgui.meta.data;
 
-import me.zmaster.zgui.menu.SlotPattern;
+import com.cryptomorin.xseries.XMaterial;
+import com.cryptomorin.xseries.profiles.builder.XSkull;
+import com.cryptomorin.xseries.profiles.objects.ProfileInputType;
+import com.cryptomorin.xseries.profiles.objects.Profileable;
+import me.zmaster.zgui.meta.path.KeyPath;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -14,40 +17,31 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-/**
- * Represents metadata for a menu icon, including its assigned slots
- * and multiple item states (such as default and custom states).
- * Responsible for loading icon configuration from a YAML file and
- * building the corresponding ItemStack representations.
- */
-public final class IconMetadata {
+public class ItemData {
 
-    /**
-     * The default state key for icons without specific states.
-     */
     public static final String DEFAULT_STATE = "default";
+    private final Map<String, ItemStack> items = new HashMap<>();
 
-    private final List<Integer> slots;
-    private final Map<String, ItemStack> itemStates = new HashMap<>();
+    public ItemData(KeyPath adapter) {
+        ConfigurationSection section = adapter.asSection();
+        Objects.requireNonNull(section, "section might not be null");
 
-    /**
-     * Returns the list of inventory slot indices where this icon should be placed.
-     *
-     * @return list of slot indices
-     */
-    public List<Integer> getSlots() {
-        return slots;
+        if (isNested(section)) {
+            setupNestedItems(section);
+        } else {
+            setupDefaultItem(section);
+        }
     }
 
     /**
-     * Returns a map of all item states associated with this icon.
+     * Returns a map of all item states associated with this data.
      * Each key corresponds to a state name and maps to an ItemStack.
      *
      * @return map of state names to ItemStacks
      */
     @NotNull
     public Map<String, ItemStack> getItems() {
-        return itemStates;
+        return items;
     }
 
     /**
@@ -57,33 +51,19 @@ public final class IconMetadata {
      */
     @Nullable
     public ItemStack getDefaultItem() {
-        return itemStates.get(DEFAULT_STATE);
+        return getItem(DEFAULT_STATE);
     }
 
     /**
      * Returns the ItemStack for the specified state if present,
-     * otherwise returns the default ItemStack.
      *
      * @param state the state name
-     * @return the ItemStack for the state or default if absent
+     * @return the ItemStack for the state or null if absent
      */
     @Nullable
-    public ItemStack getItemOrDefault(String state) {
-        return itemStates.getOrDefault(state, getDefaultItem());
-    }
-
-    public IconMetadata(FileConfiguration file, String key, SlotPattern slotPattern) {
-        String slot = file.getString("slots." + key);
-        this.slots = slotPattern.getSlotsByChar(slot);
-
-        ConfigurationSection itemSection = file.getConfigurationSection("items." + key);
-        if (itemSection != null) {
-            if (isNested(itemSection)) {
-                setupNestedItems(itemSection);
-            } else {
-                setupDefaultItem(itemSection);
-            }
-        }
+    public ItemStack getItem(String state) {
+        ItemStack item = items.get(state);
+        return item != null ? item.clone() : null;
     }
 
     private boolean isNested(ConfigurationSection itemSection) {
@@ -96,20 +76,24 @@ public final class IconMetadata {
         return false;
     }
 
-    private void setupNestedItems(ConfigurationSection itemSection) {
-        for (Object subKey : itemSection.getKeys(false)) {
-            ConfigurationSection subSection = itemSection.getConfigurationSection(subKey.toString());
-            itemStates.put(subKey.toString(), buildItem(subSection));
+    private void setupNestedItems(@NotNull ConfigurationSection section) {
+        for (Object subKey : section.getKeys(false)) {
+            ConfigurationSection subSection = section.getConfigurationSection(subKey.toString());
+            items.put(subKey.toString(), buildItem(Objects.requireNonNull(subSection)));
         }
     }
 
     private void setupDefaultItem(ConfigurationSection itemSection) {
-        itemStates.put(DEFAULT_STATE, buildItem(itemSection));
+        items.put(DEFAULT_STATE, buildItem(itemSection));
     }
 
     private ItemStack buildItem(ConfigurationSection section) {
         String materialName = section.getString("type", "STONE");
-        ItemStack item = new ItemStack(Material.valueOf(materialName));
+        XMaterial material = XMaterial.matchXMaterial(materialName).orElse(XMaterial.STONE);
+        ItemStack item = material.parseItem();
+        if (item == null) {
+            item = new ItemStack(Material.STONE);
+        }
 
         ItemMeta meta = item.getItemMeta();
         String displayName = section.getString("name");
@@ -124,6 +108,12 @@ public final class IconMetadata {
                 coloredLore.add(ChatColor.translateAlternateColorCodes('&', text));
             });
             meta.setLore(coloredLore);
+        }
+
+        String base64 = section.getString("base64");
+        if (base64 != null && material == XMaterial.PLAYER_HEAD) {
+            Profileable profileable = Profileable.of(ProfileInputType.BASE64, base64);
+            meta = XSkull.of(meta).profile(profileable).apply();
         }
 
         if (section.getBoolean("glow")) {

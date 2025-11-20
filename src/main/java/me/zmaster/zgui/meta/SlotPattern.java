@@ -1,4 +1,4 @@
-package me.zmaster.zgui.menu;
+package me.zmaster.zgui.meta;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryType;
@@ -43,7 +43,7 @@ public class SlotPattern {
             this.inventoryType = InventoryType.CRAFTING;
         } else {
             if (slotMatrix.length % 9 != 0) {
-                throw new IllegalArgumentException("Slots amount is not a multiple of 9");
+                throw new ArithmeticException("Slots amount is not a multiple of 9");
             }
             this.inventoryType = InventoryType.CHEST;
         }

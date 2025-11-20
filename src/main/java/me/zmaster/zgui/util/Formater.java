@@ -4,6 +4,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -16,6 +17,10 @@ import java.util.Objects;
 public class Formater {
 
     private Object[] placeholders;
+
+    public static ItemStack format(ItemStack item, Object... placeholders) {
+        return new Formater(placeholders).formatItem(item);
+    }
 
     /**
      * Creates a new Formater with the given placeholders.
@@ -68,10 +73,16 @@ public class Formater {
      * @param item the ItemStack to format
      * @return a new formatted ItemStack clone
      */
-    public ItemStack formatItem(@NotNull ItemStack item) {
-        ItemStack formatedItem = Objects.requireNonNull(item, "item cannot be null").clone();
+    public ItemStack formatItem(@Nullable ItemStack item) {
+        if (item == null) {
+            return null;
+        }
 
-        ItemMeta meta = formatedItem.getItemMeta();
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return item.clone();
+        }
+
         String displayName = meta.getDisplayName();
         List<String> lore = meta.getLore();
 
@@ -83,6 +94,7 @@ public class Formater {
             meta.setLore(formatStringList(lore));
         }
 
+        ItemStack formatedItem = item.clone();
         formatedItem.setItemMeta(meta);
         return formatedItem;
     }
