@@ -1,29 +1,20 @@
 package me.zmaster.zgui.meta;
 
 import me.zmaster.zgui.meta.data.ItemData;
+import me.zmaster.zgui.meta.data.SlotsData;
 import me.zmaster.zgui.meta.path.KeyPath;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
 
-public final class ElementMeta {
+public final class ElementMeta extends AbstractMeta {
 
-    private final List<Integer> slots;
-    private final Map<Class<?>, Object> keys = new HashMap<>();
-
-    ElementMeta(List<Integer> slots, String key, FileConfiguration config, Map<String, Function<KeyPath, Object>> paths) {
-        this.slots = slots;
-
-        for (Map.Entry<String, Function<KeyPath, Object>> path : paths.entrySet()) {
-            KeyPath keyPath = new KeyPath(config, path.getKey() + "." + key);
-            if (keyPath.exists()) continue;
-
-            Object keyMeta = path.getValue().apply(keyPath);
-            keys.put(keyMeta.getClass(), keyMeta);
-        }
+    ElementMeta(ConfigurationSection config, Map<String, Function<KeyPath, Object>> mapping) {
+        super(config, mapping);
     }
 
     /**
@@ -32,15 +23,11 @@ public final class ElementMeta {
      * @return list of slot indices
      */
     public List<Integer> getSlots() {
-        return Collections.unmodifiableList(slots);
+        return getData("slot", SlotsData.class).map(SlotsData::getSlots).orElse(Collections.emptyList());
     }
 
-    public <T> @Nullable T getData(Class<T> clazz) {
-        return clazz.cast(keys.get(clazz));
-    }
-
-    public ItemData getItemData() {
-        return Objects.requireNonNull(getData(ItemData.class));
+    public @NotNull Optional<ItemData> getItemData() {
+        return getData("item", ItemData.class);
     }
 
     /**
@@ -50,7 +37,7 @@ public final class ElementMeta {
      */
     @Nullable
     public ItemStack getDefaultItem() {
-        return getItemData().getDefaultItem();
+        return getItemData().map(ItemData::getDefaultItem).orElse(null);
     }
 
     /**
@@ -61,7 +48,17 @@ public final class ElementMeta {
      */
     @Nullable
     public ItemStack getItem(String state) {
-        return getItemData().getItem(state);
+        return getItemData().map(data -> data.getItem(state)).orElse(null);
+    }
+
+    @Nullable
+    public ItemStack getItemOrDefault(String state) {
+        return Optional.ofNullable(getItem(state)).orElse(getDefaultItem());
+    }
+
+    @Nullable
+    public ItemStack getItemOrDefault(String state, String def) {
+        return Optional.ofNullable(getItem(state)).orElse(getItem(def));
     }
 
 }

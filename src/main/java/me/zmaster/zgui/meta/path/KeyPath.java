@@ -1,15 +1,17 @@
 package me.zmaster.zgui.meta.path;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class KeyPath {
 
-    private final FileConfiguration config;
+    private final ConfigurationSection config;
     private final String path;
 
-    public KeyPath(FileConfiguration config, String path) {
+    public KeyPath(ConfigurationSection config, String path) {
         this.config = config;
         this.path = path;
     }
@@ -24,5 +26,17 @@ public class KeyPath {
 
     public @Nullable String asString() {
         return config.getString(path);
+    }
+
+    public int asInt() {
+        return config.getInt(path);
+    }
+
+    public @NotNull List<String> asStringList() {
+        return config.getStringList(path);
+    }
+
+    public @NotNull List<Integer> asIntList() {
+        return config.getIntegerList(path);
     }
 }

@@ -14,10 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -28,11 +25,10 @@ import java.util.function.Function;
  */
 public abstract class AbstractMenu implements Menu {
 
-    private final MenuMeta metadata;
-    private final Set<String> appliedElementMetas = new HashSet<>();
-    private final Menu previousMenu;
-    final Inventory inventory;
     final Map<Integer, Element> elements = new HashMap<>();
+    final Inventory inventory;
+    private final MenuMeta metadata;
+    private final Menu previousMenu;
 
     /**
      * Constructor that creates the menu inventory based on metadata.
@@ -45,6 +41,8 @@ public abstract class AbstractMenu implements Menu {
         this.inventory = metadata.createInventory(inventoryName);
         this.previousMenu = previousMenu;
 
+        applyStaticIcons();
+
         applyElement("close", meta -> Icon.from(meta.getDefaultItem(), click -> click.getWhoClicked().closeInventory()));
         applyElement("previous", this::previousIcon);
     }
@@ -55,6 +53,10 @@ public abstract class AbstractMenu implements Menu {
 
     public MenuMeta getMetadata() {
         return metadata;
+    }
+
+    public @Nullable Menu getPreviousMenu() {
+        return previousMenu;
     }
 
     @Override
@@ -94,7 +96,8 @@ public abstract class AbstractMenu implements Menu {
      *
      * @param event the inventory open event
      */
-    protected void onOpen(InventoryOpenEvent event) {}
+    protected void onOpen(InventoryOpenEvent event) {
+    }
 
     /**
      * Called when the inventory is closed.
@@ -102,7 +105,8 @@ public abstract class AbstractMenu implements Menu {
      *
      * @param event the inventory close event
      */
-    protected void onClose(InventoryCloseEvent event) {}
+    protected void onClose(InventoryCloseEvent event) {
+    }
 
     protected void applyElement(String key, Function<ElementMeta, Element> factory) {
         applyElement(key, factory, true);
@@ -118,23 +122,16 @@ public abstract class AbstractMenu implements Menu {
         for (int index : meta.getSlots()) {
             getSlot(index).setElement(element, render);
         }
-
-        appliedElementMetas.add(key);
-    }
-
-    protected void readMeta(String key, Consumer<ElementMeta> consumer) {
-        ElementMeta meta = metadata.getElementMeta(key);
-        if (meta == null) return;
-
-        consumer.accept(meta);
-        appliedElementMetas.add(key);
     }
 
     protected void applyStaticIcons() {
-        metadata.getElementMetas().forEach((key, meta) -> {
-            if (appliedElementMetas.contains(key)) return;
-            meta.getSlots().forEach(index -> getSlot(index).setItem(meta.getDefaultItem()));
-        });
+        for (ElementMeta meta : getMetadata().getElementMetas().values()) {
+            boolean staticIcon = meta.getData("static", Boolean.class).orElse(false);
+
+            if (staticIcon) for (int index : meta.getSlots()) {
+                getSlot(index).setItem(meta.getDefaultItem());
+            }
+        }
     }
 
     private Icon previousIcon(ElementMeta iconMeta) {

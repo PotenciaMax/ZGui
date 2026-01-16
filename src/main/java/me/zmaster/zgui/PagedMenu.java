@@ -27,6 +27,8 @@ public class PagedMenu<E extends Element> extends AbstractMenu {
 
     public PagedMenu(MenuMeta menuMeta, Menu previousMenu) {
         super(menuMeta, previousMenu);
+        pageView.addSlots(menuMeta.getPagedSlots());
+
         applyElement("next_page", meta ->
                 new NextPageIcon(meta, this, NextPageIcon.NEXT_PAGE_DIRECTION), false);
         applyElement("previous_page", meta ->

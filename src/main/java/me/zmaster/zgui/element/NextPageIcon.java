@@ -3,7 +3,7 @@ package me.zmaster.zgui.element;
 import me.zmaster.zgui.element.view.PagedElementsView;
 import me.zmaster.zgui.PagedMenu;
 import me.zmaster.zgui.meta.ElementMeta;
-import me.zmaster.zgui.util.Formater;
+import me.zmaster.zgui.util.Formatter;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -40,8 +40,12 @@ public class NextPageIcon implements Icon {
         }
 
         PagedElementsView pageView = menu.getPageView();
-        Formater formater = new Formater(pageView.getPage(), pageView.getLastPage());
-        return formater.formatItem(meta.getDefaultItem());
+        Formatter formatter = new Formatter.Builder()
+                .add("page", pageView.getPage())
+                .add("last_page", pageView.getLastPage())
+                .build();
+
+        return formatter.format(meta.getDefaultItem());
     }
 
     @Override
@@ -63,9 +67,8 @@ public class NextPageIcon implements Icon {
         PagedElementsView pageView = menu.getPageView();
         int nextPage = pageView.getPage() + pageDirection;
 
-        if (nextPage < 1 || nextPage > pageView.getLastPage()) {
+        if (nextPage < 1 || nextPage > pageView.getLastPage())
             return 0;
-        }
 
         return nextPage;
     }
