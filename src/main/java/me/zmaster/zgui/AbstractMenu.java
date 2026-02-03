@@ -14,7 +14,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -41,17 +43,21 @@ public abstract class AbstractMenu implements Menu {
         this.inventory = metadata.createInventory(inventoryName);
         this.previousMenu = previousMenu;
 
-        applyStaticIcons();
-
         applyElement("close", meta -> Icon.from(meta.getDefaultItem(), click -> click.getWhoClicked().closeInventory()));
         applyElement("previous", this::previousIcon);
+
+        for (ElementMeta meta : metadata.getElementMetas().values()) {
+            if (meta.getData("static", Boolean.class).orElse(false)) {
+                setElement(meta.getSlots(), Icon.from(meta.getDefaultItem()));
+            }
+        }
     }
 
     public AbstractMenu(@NotNull MenuMeta metadata, @Nullable Menu previousMenu) {
         this(metadata, metadata.getInventoryName(), previousMenu);
     }
 
-    public MenuMeta getMetadata() {
+    public @NotNull MenuMeta getMetadata() {
         return metadata;
     }
 
@@ -65,13 +71,17 @@ public abstract class AbstractMenu implements Menu {
     }
 
     @Override
-    public void open(HumanEntity player) {
+    public void open(@NotNull HumanEntity player) {
+        Objects.requireNonNull(player, "player must not be null");
+
         ZGui.get().registerMenu(this);
         player.openInventory(inventory);
     }
 
     @Override
-    public void openPrevious(HumanEntity player) {
+    public void openPrevious(@NotNull HumanEntity player) {
+        Objects.requireNonNull(player, "player must not be null");
+
         if (previousMenu != null) previousMenu.open(player);
     }
 
@@ -108,30 +118,27 @@ public abstract class AbstractMenu implements Menu {
     protected void onClose(InventoryCloseEvent event) {
     }
 
-    protected void applyElement(String key, Function<ElementMeta, Element> factory) {
-        applyElement(key, factory, true);
-    }
-
-    protected void applyElement(String key, Function<ElementMeta, Element> factory, boolean render) {
+    protected @Nullable <E extends Element> E applyElement(String key, Function<ElementMeta, E> factory, boolean render) {
         ElementMeta meta = metadata.getElementMeta(key);
-        if (meta == null) return;
+        if (meta == null) return null;
 
-        Element element = factory.apply(meta);
-        if (element == null) return;
+        E element = factory.apply(meta);
+        if (element == null) return null;
 
-        for (int index : meta.getSlots()) {
-            getSlot(index).setElement(element, render);
-        }
+        setElement(meta.getSlots(), element, render);
+        return element;
     }
 
-    protected void applyStaticIcons() {
-        for (ElementMeta meta : getMetadata().getElementMetas().values()) {
-            boolean staticIcon = meta.getData("static", Boolean.class).orElse(false);
+    protected @Nullable <E extends Element> E applyElement(String key, Function<ElementMeta, E> factory) {
+        return applyElement(key, factory, true);
+    }
 
-            if (staticIcon) for (int index : meta.getSlots()) {
-                getSlot(index).setItem(meta.getDefaultItem());
-            }
-        }
+    protected void setElement(List<Integer> slots, Element element, boolean render) {
+        for (int slot : slots) getSlot(slot).setElement(element, render);
+    }
+
+    protected void setElement(List<Integer> slots, Element element) {
+        setElement(slots, element, true);
     }
 
     private Icon previousIcon(ElementMeta iconMeta) {
