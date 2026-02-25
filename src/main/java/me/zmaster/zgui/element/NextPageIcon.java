@@ -41,7 +41,7 @@ public class NextPageIcon implements Icon {
 
         PagedElementsView pageView = menu.getPageView();
         Formatter formatter = new Formatter.Builder()
-                .add("page", pageView.getPage())
+                .add("current_page", pageView.getPage())
                 .add("last_page", pageView.getLastPage())
                 .build();
 

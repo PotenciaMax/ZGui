@@ -13,7 +13,11 @@ public class ItemBuilder {
     private final ItemStack item;
     private final ItemMeta meta;
 
-    public ItemBuilder(@Nullable ItemStack item) {
+    public static ItemBuilder of(@Nullable ItemStack item) {
+        return new ItemBuilder(item);
+    }
+
+    private ItemBuilder(@Nullable ItemStack item) {
         this.item = item;
         this.meta = item == null ? null : item.getItemMeta();
     }

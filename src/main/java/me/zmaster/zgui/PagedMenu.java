@@ -25,7 +25,7 @@ public class PagedMenu<E extends Element> extends AbstractMenu {
     private final List<E> pagedElements = new ArrayList<>();
     private Comparator<E> iconComparator;
 
-    public PagedMenu(MenuMeta menuMeta, Menu previousMenu) {
+    public PagedMenu(MenuMeta<?> menuMeta, Menu previousMenu) {
         super(menuMeta, previousMenu);
         pageView.addSlots(menuMeta.getPagedSlots());
 

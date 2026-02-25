@@ -4,7 +4,6 @@ import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.profiles.builder.XSkull;
 import com.cryptomorin.xseries.profiles.objects.ProfileInputType;
 import com.cryptomorin.xseries.profiles.objects.Profileable;
-import me.zmaster.zgui.meta.path.KeyPath;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -22,8 +21,7 @@ public class ItemData {
     public static final String DEFAULT_STATE = "default";
     private final Map<String, ItemStack> items = new HashMap<>();
 
-    public ItemData(KeyPath adapter) {
-        ConfigurationSection section = adapter.asSection();
+    public ItemData(@NotNull ConfigurationSection section) {
         Objects.requireNonNull(section, "section might not be null");
 
         if (isNested(section)) {

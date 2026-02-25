@@ -1,54 +1,65 @@
 package me.zmaster.zgui.meta;
 
-import me.zmaster.zgui.meta.data.ItemData;
-import me.zmaster.zgui.meta.data.SlotsData;
-import me.zmaster.zgui.meta.path.KeyPath;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
 
-public final class MenuMeta extends AbstractMeta {
+public abstract class MenuMeta<E extends ElementMeta> {
+
+    public static MenuMeta<ElementMeta> from(ConfigurationSection config) {
+        return new MenuMeta<ElementMeta>(config) {
+            @Override
+            protected ElementMeta buildElementMeta(ConfigurationSection section) {
+                return new ElementMeta(this, section);
+            }
+        };
+    }
 
     private final String inventoryName;
     private final SlotPattern slotPattern;
-    private final Map<String, ElementMeta> elementMetas = new HashMap<>();
+    private final List<Integer> pagedSlots;
+    private final Map<String, E> elementMetas = new HashMap<>();
 
-    MenuMeta(Builder builder) {
-        super(builder.config, builder.mappedData);
-        this.inventoryName = builder.inventoryName;
-        this.slotPattern = builder.slotPattern;
+    public MenuMeta(ConfigurationSection config) {
+        this.inventoryName = ChatColor.translateAlternateColorCodes('&', config.getString("name", ""));
+        this.slotPattern = new SlotPattern(config.getStringList("slot_pattern"));
+        this.pagedSlots = slotPattern.getSlotsByChar(config.getString("paged_slots"));
 
-        ConfigurationSection elements = builder.config.getConfigurationSection("elements");
-        if (elements != null) {
-            for (String key : elements.getKeys(false)) {
-                ConfigurationSection elementSec = elements.getConfigurationSection(key);
+        ConfigurationSection elementsSec = config.getConfigurationSection("elements");
+        if (elementsSec != null) {
+            for (String key : elementsSec.getKeys(false)) {
+                ConfigurationSection elementSec = elementsSec.getConfigurationSection(key);
                 if (elementSec == null) continue;
-                elementMetas.put(key, new ElementMeta(elementSec, builder.mappedElementsData));
+                elementMetas.put(key, buildElementMeta(elementSec));
             }
         }
     }
 
-    @NotNull
-    public String getInventoryName() {
+    public @NotNull String getInventoryName() {
         return inventoryName;
     }
 
-    public Map<String, ElementMeta> getElementMetas() {
+    public @NotNull SlotPattern getSlotPattern() {
+        return slotPattern;
+    }
+
+    public @NotNull List<Integer> getPagedSlots() {
+        return pagedSlots;
+    }
+
+    public @NotNull Map<String, ElementMeta> getElementMetas() {
         return Collections.unmodifiableMap(elementMetas);
     }
 
-    @Nullable
-    public ElementMeta getElementMeta(String key) {
+    public @Nullable ElementMeta getElementMeta(String key) {
         return elementMetas.get(key);
     }
 
-    public Inventory createInventory() {
+    public @NotNull Inventory createInventory() {
         return slotPattern.createInventory(inventoryName);
     }
 
@@ -56,56 +67,6 @@ public final class MenuMeta extends AbstractMeta {
         return slotPattern.createInventory(name);
     }
 
-    public List<Integer> getPagedSlots() {
-        return getData("paged_slots", SlotsData.class).map(SlotsData::getSlots).orElse(Collections.emptyList());
-    }
-
-    public static class Builder {
-
-        private final FileConfiguration config;
-        private final String inventoryName;
-        private final SlotPattern slotPattern;
-        private final Map<String, Function<KeyPath, Object>> mappedData = new HashMap<>();
-        private final Map<String, Function<KeyPath, Object>> mappedElementsData = new HashMap<>();
-
-        public Builder(@NotNull FileConfiguration config) {
-            this.config = Objects.requireNonNull(config, "config might not be null");
-            this.inventoryName = Optional.ofNullable(config.getString("name"))
-                    .map(name -> ChatColor.translateAlternateColorCodes('&', name))
-                    .orElse("");
-            this.slotPattern = new SlotPattern(config.getStringList("slot_pattern"));
-
-            mapData("paged_slots", path -> new SlotsData(path, slotPattern));
-            mapElementData("slot", path -> new SlotsData(path, slotPattern));
-            mapElementData("item", ItemData::new);
-        }
-
-        public FileConfiguration getConfig() {
-            return config;
-        }
-
-        public String getInventoryName() {
-            return inventoryName;
-        }
-
-        public SlotPattern getSlotPattern() {
-            return slotPattern;
-        }
-
-        public Builder mapData(String path, Function<KeyPath, Object> factory) {
-            mappedData.put(path, factory);
-            return this;
-        }
-
-        public Builder mapElementData(String path, Function<KeyPath, Object> factory) {
-            mappedElementsData.put(path, factory);
-            return this;
-        }
-
-        public MenuMeta build() {
-            return new MenuMeta(this);
-        }
-
-    }
+    protected abstract E buildElementMeta(ConfigurationSection section);
 
 }

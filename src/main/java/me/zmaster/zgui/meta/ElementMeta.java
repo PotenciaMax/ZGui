@@ -1,20 +1,24 @@
 package me.zmaster.zgui.meta;
 
 import me.zmaster.zgui.meta.data.ItemData;
-import me.zmaster.zgui.meta.data.SlotsData;
-import me.zmaster.zgui.meta.path.KeyPath;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
 
-public final class ElementMeta extends AbstractMeta {
+public class ElementMeta {
 
-    ElementMeta(ConfigurationSection config, Map<String, Function<KeyPath, Object>> mapping) {
-        super(config, mapping);
+    private final List<Integer> slots;
+    private final ItemData itemData;
+    private final boolean autoApply;
+
+    public ElementMeta(MenuMeta<?> menuMeta, ConfigurationSection config) {
+        this.slots = menuMeta.getSlotPattern().getSlotsByChar(config.getString("slot"));
+        ConfigurationSection itemDataSec = config.getConfigurationSection("item");
+        this.itemData = itemDataSec != null ? new ItemData(itemDataSec) : null;
+        this.autoApply = config.getBoolean("static");
     }
 
     /**
@@ -23,11 +27,15 @@ public final class ElementMeta extends AbstractMeta {
      * @return list of slot indices
      */
     public List<Integer> getSlots() {
-        return getData("slot", SlotsData.class).map(SlotsData::getSlots).orElse(Collections.emptyList());
+        return Collections.unmodifiableList(slots);
     }
 
     public @NotNull Optional<ItemData> getItemData() {
-        return getData("item", ItemData.class);
+        return Optional.ofNullable(itemData);
+    }
+
+    public boolean isAutoApply() {
+        return autoApply;
     }
 
     /**
@@ -60,5 +68,4 @@ public final class ElementMeta extends AbstractMeta {
     public ItemStack getItemOrDefault(String state, String def) {
         return Optional.ofNullable(getItem(state)).orElse(getItem(def));
     }
-
 }

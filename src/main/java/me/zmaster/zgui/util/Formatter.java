@@ -39,19 +39,42 @@ public class Formatter {
         DECIMAL_FORMAT = new DecimalFormat("0.##", symbols);
     }
 
+    public static Formatter of(String k1, Object v1) {
+        return new Formatter.Builder().add(k1, v1).build();
+    }
+
+    public static Formatter of(String k1, Object v1, String k2, Object v2) {
+        return new Formatter.Builder()
+                .add(k1, v1)
+                .add(k2, v2)
+                .build();
+    }
+
     private final Map<String, Object> variables;
     private final Map<String, Double> numericalVariables;
+    private final int maxLoreLineSize;
 
-    private Formatter(Map<String, Object> variables, Map<String, Double> numericalVariables) {
+    private Formatter(Map<String, Object> variables, Map<String, Double> numericalVariables, int maxLoreLineSize) {
+        if (maxLoreLineSize <= 0) {
+            throw new IllegalStateException("maxLoreLineSize must be > 0");
+        }
+
         this.variables = variables;
         this.numericalVariables = numericalVariables;
+        this.maxLoreLineSize = maxLoreLineSize;
     }
 
     public static final class Builder {
         private final Map<String, Object> variables = new HashMap<>();
+        private int maxLoreLineSize = 50;
 
         public Builder add(String key, Object value) {
             variables.put(key, value);
+            return this;
+        }
+
+        public Builder maxLoreLineSize(int value) {
+            this.maxLoreLineSize = value;
             return this;
         }
 
@@ -63,20 +86,31 @@ public class Formatter {
                     numerical.put(entry.getKey(), ((Number) entry.getValue()).doubleValue());
                 }
             }
-            return new Formatter(Collections.unmodifiableMap(variables), Collections.unmodifiableMap(numerical));
+            return new Formatter(Collections.unmodifiableMap(variables), Collections.unmodifiableMap(numerical), maxLoreLineSize);
         }
     }
 
     // --- Métodos Públicos ---
 
     public List<String> format(@NotNull List<String> list) {
-        Objects.requireNonNull(list, "A lista não pode ser nula");
+        Objects.requireNonNull(list, "list must no be null");
         if (list.isEmpty()) return list;
 
         List<String> result = new ArrayList<>(list.size());
         for (String line : list) {
-            result.add(format(line));
+            String formated = format(line);
+
+            while (formated.length() > maxLoreLineSize) {
+                int cutIndex = formated.lastIndexOf(" ", maxLoreLineSize);
+                if (cutIndex == -1) cutIndex = maxLoreLineSize;
+
+                result.add(formated.substring(0, cutIndex));
+                formated = formated.substring(cutIndex).trim();
+            }
+
+            result.add(formated);
         }
+
         return result;
     }
 

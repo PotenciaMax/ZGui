@@ -29,7 +29,7 @@ public abstract class AbstractMenu implements Menu {
 
     final Map<Integer, Element> elements = new HashMap<>();
     final Inventory inventory;
-    private final MenuMeta metadata;
+    private final MenuMeta<?> metadata;
     private final Menu previousMenu;
 
     /**
@@ -38,7 +38,7 @@ public abstract class AbstractMenu implements Menu {
      * @param metadata     the metadata describing menu configuration
      * @param previousMenu the previous menu, can be null
      */
-    public AbstractMenu(@NotNull MenuMeta metadata, @NotNull String inventoryName, @Nullable Menu previousMenu) {
+    public AbstractMenu(@NotNull MenuMeta<?> metadata, @NotNull String inventoryName, @Nullable Menu previousMenu) {
         this.metadata = metadata;
         this.inventory = metadata.createInventory(inventoryName);
         this.previousMenu = previousMenu;
@@ -47,17 +47,17 @@ public abstract class AbstractMenu implements Menu {
         applyElement("previous", this::previousIcon);
 
         for (ElementMeta meta : metadata.getElementMetas().values()) {
-            if (meta.getData("static", Boolean.class).orElse(false)) {
+            if (meta.isAutoApply()) {
                 setElement(meta.getSlots(), Icon.from(meta.getDefaultItem()));
             }
         }
     }
 
-    public AbstractMenu(@NotNull MenuMeta metadata, @Nullable Menu previousMenu) {
+    public AbstractMenu(@NotNull MenuMeta<?> metadata, @Nullable Menu previousMenu) {
         this(metadata, metadata.getInventoryName(), previousMenu);
     }
 
-    public @NotNull MenuMeta getMetadata() {
+    public @NotNull MenuMeta<?> getMetadata() {
         return metadata;
     }
 
