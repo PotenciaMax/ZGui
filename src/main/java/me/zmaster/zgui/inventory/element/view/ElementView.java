@@ -58,7 +58,7 @@ public interface ElementView {
     }
 
     /**
-     * Adds the given slot indices to the list of slots handled by this updater.
+     * Adds the given slot indices to the list of slots handled by this view.
      *
      * @param slots the slot indices to add
      */
@@ -67,7 +67,7 @@ public interface ElementView {
     }
 
     /**
-     * Removes the given slot indices from the list of slots handled by this updater.
+     * Removes the given slot indices from the list of slots handled by this view.
      *
      * @param slots the slot indices to remove
      */
