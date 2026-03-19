@@ -1,7 +1,7 @@
-package me.zmaster.zgui.element.view;
+package me.zmaster.zgui.inventory.element.view;
 
-import me.zmaster.zgui.Slot;
-import me.zmaster.zgui.PagedMenu;
+import me.zmaster.zgui.inventory.Slot;
+import me.zmaster.zgui.inventory.PagedMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

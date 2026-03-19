@@ -1,6 +1,6 @@
-package me.zmaster.zgui.element;
+package me.zmaster.zgui.inventory.element;
 
-import me.zmaster.zgui.Slot;
+import me.zmaster.zgui.inventory.Slot;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 public interface Element {

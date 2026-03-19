@@ -1,4 +1,4 @@
-package me.zmaster.zgui.util;
+package me.zmaster.zgui.inventory.util;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

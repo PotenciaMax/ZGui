@@ -1,0 +1,8 @@
+name: ZGui
+main: me.zmaster.zgui.ZGuiPlugin
+author: zMasterDev
+version: 3.0.0
+api-version: 1.21
+softdepend:
+  - packetevents
+  - ViaVersion

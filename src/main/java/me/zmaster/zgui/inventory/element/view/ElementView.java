@@ -1,5 +1,6 @@
-package me.zmaster.zgui.element.view;
+package me.zmaster.zgui.inventory.element.view;
 
+import me.zmaster.zgui.inventory.AbstractMenu;
 import me.zmaster.zgui.Menu;
 import java.util.List;
 import java.util.Objects;
@@ -13,31 +14,31 @@ import java.util.Objects;
  */
 public interface ElementView {
 
-    static ElementView create(Menu menu) {
+    static ElementView create(AbstractMenu menu) {
         return new SimpleElementView(menu);
     }
 
-    static ElementView create(Menu menu, List<Integer> slots) {
+    static ElementView create(AbstractMenu menu, List<Integer> slots) {
         ElementView view = create(menu);
         view.addSlots(Objects.requireNonNull(slots, "slots cannot be null"));
         return view;
     }
 
-    static ElementView create(Menu menu, int slot) {
+    static ElementView create(AbstractMenu menu, int slot) {
         ElementView view = create(menu);
         view.addSlot(slot);
         return view;
     }
 
     /**
-     * Returns the list of slot indices that this updater will handle.
+     * Returns the list of slot indices that this view will handle.
      *
      * @return the list of slot indices
      */
     List<Integer> getSlots();
 
     /**
-     * Returns the menu associated with this updater.
+     * Returns the menu associated with this view.
      *
      * @return the menu instance
      */

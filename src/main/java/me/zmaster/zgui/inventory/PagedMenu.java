@@ -1,10 +1,12 @@
-package me.zmaster.zgui;
+package me.zmaster.zgui.inventory;
 
-import me.zmaster.zgui.element.Element;
-import me.zmaster.zgui.element.*;
-import me.zmaster.zgui.element.view.ElementView;
-import me.zmaster.zgui.element.view.PagedElementsView;
-import me.zmaster.zgui.meta.MenuMeta;
+import me.zmaster.zgui.Menu;
+import me.zmaster.zgui.inventory.element.Element;
+import me.zmaster.zgui.inventory.element.NextPageIcon;
+import me.zmaster.zgui.inventory.element.view.ElementView;
+import me.zmaster.zgui.inventory.element.view.PagedElementsView;
+import me.zmaster.zgui.inventory.meta.ElementMeta;
+import me.zmaster.zgui.inventory.meta.MenuMeta;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -18,20 +20,20 @@ import java.util.List;
  * functionality to navigate between pages using next and previous page icons.
  * It uses separate updaters to refresh navigation icons and paged icons specifically.
  */
-public class PagedMenu<E extends Element> extends AbstractMenu {
+public class PagedMenu<T extends Element> extends AbstractMenu {
 
     private final ElementView navigationView = ElementView.create(this);
     private final PagedElementsView pageView = new PagedElementsView(this);
-    private final List<E> pagedElements = new ArrayList<>();
-    private Comparator<E> iconComparator;
+    private final List<T> pagedElements = new ArrayList<>();
+    private Comparator<T> iconComparator;
 
     public PagedMenu(MenuMeta<?> menuMeta, Menu previousMenu) {
         super(menuMeta, previousMenu);
         pageView.addSlots(menuMeta.getPagedSlots());
 
-        applyElement("next_page", meta ->
+        applyElement(menuMeta, "next_page", meta ->
                 new NextPageIcon(meta, this, NextPageIcon.NEXT_PAGE_DIRECTION), false);
-        applyElement("previous_page", meta ->
+        applyElement(menuMeta, "previous_page", meta ->
                 new NextPageIcon(meta, this, NextPageIcon.PREVIOUS_PAGE_DIRECTION), false);
     }
 
@@ -58,11 +60,11 @@ public class PagedMenu<E extends Element> extends AbstractMenu {
      *
      * @return list of paged icons
      */
-    public List<E> getPagedElements() {
+    public List<T> getPagedElements() {
         return pagedElements;
     }
 
-    public Comparator<E> getIconComparator() {
+    public Comparator<T> getIconComparator() {
         return iconComparator;
     }
 
@@ -71,7 +73,7 @@ public class PagedMenu<E extends Element> extends AbstractMenu {
      *
      * @param iconComparator comparator to sort paged icons
      */
-    public void setIconComparator(@Nullable Comparator<E> iconComparator) {
+    public void setIconComparator(@Nullable Comparator<T> iconComparator) {
         this.iconComparator = iconComparator;
     }
 

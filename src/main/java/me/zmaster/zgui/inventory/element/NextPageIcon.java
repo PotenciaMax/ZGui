@@ -1,9 +1,9 @@
-package me.zmaster.zgui.element;
+package me.zmaster.zgui.inventory.element;
 
-import me.zmaster.zgui.element.view.PagedElementsView;
-import me.zmaster.zgui.PagedMenu;
-import me.zmaster.zgui.meta.ElementMeta;
-import me.zmaster.zgui.util.Formatter;
+import me.zmaster.zgui.inventory.element.view.PagedElementsView;
+import me.zmaster.zgui.inventory.PagedMenu;
+import me.zmaster.zgui.inventory.meta.ElementMeta;
+import me.zmaster.zgui.inventory.util.Formatter;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 

@@ -1,9 +1,11 @@
-package me.zmaster.zgui;
+package me.zmaster.zgui.inventory;
 
-import me.zmaster.zgui.element.Element;
+import me.zmaster.zgui.Menu;
+import me.zmaster.zgui.inventory.element.Element;
+import me.zmaster.zgui.inventory.meta.ElementMeta;
 import org.bukkit.inventory.ItemStack;
 
-public class Slot {
+public class Slot<E extends ElementMeta> {
 
     private final AbstractMenu menu;
     private final int index;

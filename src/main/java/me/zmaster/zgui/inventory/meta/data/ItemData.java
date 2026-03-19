@@ -1,9 +1,6 @@
-package me.zmaster.zgui.meta.data;
+package me.zmaster.zgui.inventory.meta.data;
 
 import com.cryptomorin.xseries.XMaterial;
-import com.cryptomorin.xseries.profiles.builder.XSkull;
-import com.cryptomorin.xseries.profiles.objects.ProfileInputType;
-import com.cryptomorin.xseries.profiles.objects.Profileable;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -101,18 +98,18 @@ public class ItemData {
 
         List<String> lore = section.getStringList("lore");
         if (!lore.isEmpty()) {
-            List<String> coloredLore = new ArrayList();
+            List<String> coloredLore = new ArrayList<>();
             lore.forEach((text) -> {
                 coloredLore.add(ChatColor.translateAlternateColorCodes('&', text));
             });
             meta.setLore(coloredLore);
         }
 
-        String base64 = section.getString("base64");
-        if (base64 != null && material == XMaterial.PLAYER_HEAD) {
-            Profileable profileable = Profileable.of(ProfileInputType.BASE64, base64);
-            meta = XSkull.of(meta).profile(profileable).apply();
-        }
+        //String base64 = section.getString("base64");
+        //if (base64 != null && material == XMaterial.PLAYER_HEAD) {
+        //    Profileable profileable = Profileable.of(ProfileInputType.BASE64, base64);
+        //    meta = XSkull.of(meta).profile(profileable).apply();
+        //}
 
         if (section.getBoolean("glow")) {
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

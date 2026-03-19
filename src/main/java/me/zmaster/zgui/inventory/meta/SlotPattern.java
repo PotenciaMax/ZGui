@@ -1,4 +1,4 @@
-package me.zmaster.zgui.meta;
+package me.zmaster.zgui.inventory.meta;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryType;

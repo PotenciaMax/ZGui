@@ -1,6 +1,6 @@
-package me.zmaster.zgui.meta;
+package me.zmaster.zgui.inventory.meta;
 
-import me.zmaster.zgui.meta.data.ItemData;
+import me.zmaster.zgui.inventory.meta.data.ItemData;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

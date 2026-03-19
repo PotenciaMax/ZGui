@@ -1,7 +1,8 @@
-package me.zmaster.zgui.element.view;
+package me.zmaster.zgui.inventory.element.view;
 
-import me.zmaster.zgui.element.Element;
-import me.zmaster.zgui.Slot;
+import me.zmaster.zgui.inventory.AbstractMenu;
+import me.zmaster.zgui.inventory.element.Element;
+import me.zmaster.zgui.inventory.Slot;
 import me.zmaster.zgui.Menu;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,9 +18,9 @@ import java.util.Objects;
 public class SimpleElementView implements ElementView {
 
     private final List<Integer> slots = new ArrayList<>();
-    private final Menu menu;
+    private final AbstractMenu menu;
 
-    SimpleElementView(@NotNull Menu menu) {
+    SimpleElementView(@NotNull AbstractMenu menu) {
         this.menu = Objects.requireNonNull(menu, "menu cannot be null");
     }
 
