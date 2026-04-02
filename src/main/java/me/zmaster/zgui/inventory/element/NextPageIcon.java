@@ -1,7 +1,7 @@
 package me.zmaster.zgui.inventory.element;
 
+import me.zmaster.zgui.inventory.element.view.ElementsView;
 import me.zmaster.zgui.inventory.element.view.PagedElementsView;
-import me.zmaster.zgui.inventory.PagedMenu;
 import me.zmaster.zgui.inventory.meta.ElementMeta;
 import me.zmaster.zgui.inventory.util.Formatter;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -12,23 +12,23 @@ import org.bukkit.inventory.ItemStack;
  * Handles displaying the icon item based on whether the next/previous page
  * is available and processes click events to update the current page.
  */
-public class NextPageIcon implements Icon {
+public class NextPageIcon implements Element {
 
     public static final int NEXT_PAGE_DIRECTION = 1;
     public static final int PREVIOUS_PAGE_DIRECTION = -1;
 
     private final ElementMeta meta;
-    private final PagedMenu<?> menu;
+    private final PagedElementsView<?> pageView;
+    private final ElementsView navigationView;
     private final int pageDirection;
 
-    public NextPageIcon(ElementMeta meta, PagedMenu<?> menu, int pageDirection) {
-        if (pageDirection == 0) throw new ArithmeticException("pageDirection cannot be 0");
+    public NextPageIcon(ElementMeta meta, PagedElementsView<?> pageView, ElementsView navigationView, int pageDirection) {
+        if (pageDirection == 0) throw new IllegalArgumentException("pageDirection cannot be 0");
 
         this.meta = meta;
-        this.menu = menu;
+        this.pageView = pageView;
+        this.navigationView = navigationView;
         this.pageDirection = pageDirection;
-
-        menu.getNavigationView().addSlots(meta.getSlots());
     }
 
     @Override
@@ -39,7 +39,6 @@ public class NextPageIcon implements Icon {
             return meta.getItem("not_next");
         }
 
-        PagedElementsView pageView = menu.getPageView();
         Formatter formatter = new Formatter.Builder()
                 .add("current_page", pageView.getPage())
                 .add("last_page", pageView.getLastPage())
@@ -53,10 +52,9 @@ public class NextPageIcon implements Icon {
         int nextPage = calculateNextPage();
         if (nextPage == 0) return;
 
-        PagedElementsView pageView = menu.getPageView();
         pageView.setPage(nextPage);
         pageView.update();
-        menu.getNavigationView().update();
+        navigationView.update();
     }
 
     /**
@@ -64,7 +62,6 @@ public class NextPageIcon implements Icon {
      * Returns 0 if there is no valid next/previous page.
      */
     private int calculateNextPage() {
-        PagedElementsView pageView = menu.getPageView();
         int nextPage = pageView.getPage() + pageDirection;
 
         if (nextPage < 1 || nextPage > pageView.getLastPage())

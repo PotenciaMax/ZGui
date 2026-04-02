@@ -3,17 +3,16 @@ package me.zmaster.zgui.inventory.meta;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
 
-public abstract class MenuMeta<E extends ElementMeta> extends Meta {
+public abstract class MenuMeta<E extends ElementMeta> {
 
-    public static <E extends ElementMeta> MenuMeta<E> withElementMeta(Plugin plugin, ConfigurationSection config, BiFunction<MenuMeta<E>, ConfigurationSection, E> factory) {
-        return new MenuMeta<E>(plugin, config) {
+    public static <E extends ElementMeta> MenuMeta<E> withElementMeta(ConfigurationSection config, BiFunction<MenuMeta<E>, ConfigurationSection, E> factory) {
+        return new MenuMeta<E>(config) {
             @Override
             protected E buildElementMeta(ConfigurationSection section) {
                 return factory.apply(this, section);
@@ -21,8 +20,8 @@ public abstract class MenuMeta<E extends ElementMeta> extends Meta {
         };
     }
 
-    public static MenuMeta<ElementMeta> create(Plugin plugin, ConfigurationSection config) {
-        return withElementMeta(plugin, config, ElementMeta::new);
+    public static MenuMeta<ElementMeta> create(ConfigurationSection config) {
+        return withElementMeta(config, ElementMeta::new);
     }
 
     private final String inventoryName;
@@ -30,8 +29,7 @@ public abstract class MenuMeta<E extends ElementMeta> extends Meta {
     private final List<Integer> pagedSlots;
     private final Map<String, E> elementMetas = new HashMap<>();
 
-    public MenuMeta(Plugin plugin, ConfigurationSection config) {
-        super(plugin);
+    public MenuMeta(ConfigurationSection config) {
         this.inventoryName = ChatColor.translateAlternateColorCodes('&', config.getString("name", ""));
         this.slotPattern = new SlotPattern(config.getStringList("slot_pattern"));
         this.pagedSlots = slotPattern.getSlotsByChar(config.getString("paged_slots"));

@@ -9,6 +9,8 @@ import me.zmaster.zgui.sign.util.ChatComponentUtil;
 import me.zmaster.zgui.sign.util.SignPacketUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 
 public class SignPacketListener implements PacketListener {
 
+    private final Plugin plugin = JavaPlugin.getProvidingPlugin(SignPacketListener.class);
     private final SignMenuManager signMenuManager;
 
     public SignPacketListener(SignMenuManager signMenuManager) {
@@ -35,7 +38,7 @@ public class SignPacketListener implements PacketListener {
                     .map(ChatComponentUtil::toPlainText)
                     .collect(Collectors.toList());
 
-            Bukkit.getScheduler().runTask(signMenu.getMeta().getPlugin(), () -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
                 Player player = Bukkit.getPlayer(user.getUUID());
                 signMenu.onClose(player, lines);
                 if (signMenu.isFakeSign()) SignPacketUtil.sendClearSign(player, signMenu.getSignLocation());

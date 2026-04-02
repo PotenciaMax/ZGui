@@ -3,15 +3,9 @@ package me.zmaster.zgui.inventory;
 import me.zmaster.zgui.Menu;
 import me.zmaster.zgui.inventory.element.Element;
 import me.zmaster.zgui.inventory.element.NextPageIcon;
-import me.zmaster.zgui.inventory.element.view.ElementView;
+import me.zmaster.zgui.inventory.element.view.ElementsView;
 import me.zmaster.zgui.inventory.element.view.PagedElementsView;
-import me.zmaster.zgui.inventory.meta.ElementMeta;
 import me.zmaster.zgui.inventory.meta.MenuMeta;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * A menu implementation that supports pagination of icons.
@@ -20,29 +14,27 @@ import java.util.List;
  * functionality to navigate between pages using next and previous page icons.
  * It uses separate updaters to refresh navigation icons and paged icons specifically.
  */
-public class PagedMenu<T extends Element> extends AbstractMenu {
+public class PagedMenu<E extends Element> extends AbstractMenu {
 
-    private final ElementView navigationView = ElementView.create(this);
-    private final PagedElementsView pageView = new PagedElementsView(this);
-    private final List<T> pagedElements = new ArrayList<>();
-    private Comparator<T> iconComparator;
+    private final PagedElementsView<E> pageView = new PagedElementsView<>(this);
+    private final ElementsView navigationView = new ElementsView(this);
 
     public PagedMenu(MenuMeta<?> menuMeta, Menu previousMenu) {
         super(menuMeta, previousMenu);
-        pageView.addSlots(menuMeta.getPagedSlots());
 
-        applyElement(menuMeta, "next_page", meta ->
-                new NextPageIcon(meta, this, NextPageIcon.NEXT_PAGE_DIRECTION), false);
-        applyElement(menuMeta, "previous_page", meta ->
-                new NextPageIcon(meta, this, NextPageIcon.PREVIOUS_PAGE_DIRECTION), false);
+        navigationView.applyElement(menuMeta, "next_page", meta ->
+                new NextPageIcon(meta, pageView, navigationView, NextPageIcon.NEXT_PAGE_DIRECTION));
+
+        navigationView.applyElement(menuMeta, "previous_page", meta ->
+                new NextPageIcon(meta, pageView, navigationView, NextPageIcon.PREVIOUS_PAGE_DIRECTION));
     }
 
     /**
      * Returns the view for navigation icons (next page, previous page).
      *
-     * @return the {@code ElementView} for navigation icons
+     * @return the {@code View} for navigation icons
      */
-    public ElementView getNavigationView() {
+    public ElementsView getNavigationView() {
         return navigationView;
     }
 
@@ -51,36 +43,8 @@ public class PagedMenu<T extends Element> extends AbstractMenu {
      *
      * @return the {@code PagedElementsView} for paged icons
      */
-    public PagedElementsView getPageView() {
+    public PagedElementsView<E> getPageView() {
         return pageView;
-    }
-
-    /**
-     * Returns the list of paged icons, sorted if a comparator is set.
-     *
-     * @return list of paged icons
-     */
-    public List<T> getPagedElements() {
-        return pagedElements;
-    }
-
-    public Comparator<T> getIconComparator() {
-        return iconComparator;
-    }
-
-    /**
-     * Sets the comparator to sort paged icons.
-     *
-     * @param iconComparator comparator to sort paged icons
-     */
-    public void setIconComparator(@Nullable Comparator<T> iconComparator) {
-        this.iconComparator = iconComparator;
-    }
-
-    public void sortIcons() {
-        if (iconComparator != null) {
-            pagedElements.sort(iconComparator);
-        }
     }
 
     public void updateView() {

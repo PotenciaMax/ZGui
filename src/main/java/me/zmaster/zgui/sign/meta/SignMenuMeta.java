@@ -1,7 +1,6 @@
 package me.zmaster.zgui.sign.meta;
 
 import com.cryptomorin.xseries.XMaterial;
-import me.zmaster.zgui.inventory.meta.Meta;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,23 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SignMenuMeta extends Meta {
+public class SignMenuMeta {
 
     private final Material signType;
     private final List<String> lines = new ArrayList<>();
 
-    public SignMenuMeta(Plugin plugin, ConfigurationSection config) {
-        super(plugin);
+    public SignMenuMeta(ConfigurationSection config) {
         this.signType = XMaterial.valueOf(config.getString("sign_type")).get();
         for (String line : config.getStringList("lines")) {
             lines.add(ChatColor.translateAlternateColorCodes('&', line));
         }
-    }
-
-    public SignMenuMeta(Plugin plugin, String material, String... lines) {
-        super(plugin);
-        this.signType = Material.valueOf(material);
-        this.lines.addAll(Arrays.asList(lines));
     }
 
     public Material getSignType() {
