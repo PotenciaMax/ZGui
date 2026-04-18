@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -60,8 +59,8 @@ public abstract class MenuMeta<E extends ElementMeta> {
         return Collections.unmodifiableMap(elementMetas);
     }
 
-    public @Nullable E getElementMeta(String key) {
-        return elementMetas.get(key);
+    public Optional<E> getElementMeta(String key) {
+        return Optional.ofNullable(elementMetas.get(key));
     }
 
     public @NotNull Inventory createInventory() {

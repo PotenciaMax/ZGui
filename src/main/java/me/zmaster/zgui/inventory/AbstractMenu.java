@@ -2,12 +2,16 @@ package me.zmaster.zgui.inventory;
 
 import me.zmaster.zgui.Menu;
 import me.zmaster.zgui.ZGui;
+import me.zmaster.zgui.inventory.context.ClickContext;
+import me.zmaster.zgui.inventory.element.Clickable;
 import me.zmaster.zgui.inventory.element.Element;
+import me.zmaster.zgui.inventory.element.abstraction.PreviousMenuElement;
+import me.zmaster.zgui.inventory.element.view.ElementsView;
+import me.zmaster.zgui.inventory.element.view.SimpleElementsView;
 import me.zmaster.zgui.inventory.meta.ElementMeta;
 import me.zmaster.zgui.inventory.meta.MenuMeta;
-import me.zmaster.zgui.inventory.meta.data.ItemData;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
@@ -16,26 +20,33 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
 
 public abstract class AbstractMenu implements Menu {
 
-    private final Map<Integer, Element> elements = new HashMap<>();
-    private final Inventory inventory;
+    final Inventory inventory;
+    private final Map<Integer, Clickable> clicks = new HashMap<>();
+    private final ElementsView<Element> elementsView = new SimpleElementsView<>(this);
     private final Menu previousMenu;
+    private boolean initialized;
 
     public AbstractMenu(@NotNull MenuMeta<?> menuMeta, @NotNull String inventoryName, @Nullable Menu previousMenu) {
         this.inventory = menuMeta.createInventory(inventoryName);
         this.previousMenu = previousMenu;
 
-        applyElement(menuMeta,"close", meta -> Element.from(meta.getDefaultItem(), click -> click.getWhoClicked().closeInventory()));
-        applyElement(menuMeta,"previous", this::previousIcon);
+        menuMeta.getElementMeta("close")
+                .map(meta -> Element.from(meta, click -> click.getPlayer().closeInventory()))
+                .ifPresent(elementsView::addElement);
 
-        for (ElementMeta meta : menuMeta.getElementMetas().values()) {
-            if (meta.isAutoApply()) {
-                setElement(meta.getSlots(), Element.from(meta.getDefaultItem()));
-            }
-        }
+        menuMeta.getElementMeta("previous")
+                .map(meta -> new PreviousMenuElement(meta, this))
+                .ifPresent(elementsView::addElement);
+
+        menuMeta.getElementMetas().values().stream()
+                .filter(ElementMeta::isAutoApply)
+                .forEach(meta -> {
+                    ItemStack item = meta.getDefaultItem();
+                    meta.getSlots().forEach(slot -> setItem(slot, item));
+                });
     }
 
     public AbstractMenu(@NotNull MenuMeta<?> menuMeta, @Nullable Menu previousMenu) {
@@ -43,74 +54,67 @@ public abstract class AbstractMenu implements Menu {
     }
 
     @Override
-    public void open(@NotNull HumanEntity player) {
+    public final void open(@NotNull Player player) {
         Objects.requireNonNull(player, "player must not be null");
 
-        ZGui.get().getInventoryMenuManager().registerMenu(player.getUniqueId(), this);
-        player.openInventory(inventory);
+        ZGui.get().getInventoryMenuManager().registerMenu(this);
+
+        if (!initialized) {
+            initialize();
+            initialized = true;
+        }
+
+        if (!inventory.getViewers().contains(player)) player.openInventory(inventory);
+    }
+
+    public @NotNull ElementsView<Element> getElementsView() {
+        return elementsView;
     }
 
     public @Nullable Menu getPreviousMenu() {
         return previousMenu;
     }
 
-    public void openPrevious(@NotNull HumanEntity player) {
-        Objects.requireNonNull(player, "player must not be null");
-
-        if (previousMenu != null) previousMenu.open(player);
-    }
-
-    public void setTittle(String title) {
+    public void setTitle(String title) {
         for (HumanEntity player : inventory.getViewers()) {
             player.getOpenInventory().setTitle(title);
         }
     }
 
-    protected void onClick(InventoryClickEvent event) {
-        Element element = elements.get(event.getSlot());
-        if (element != null) {
-            element.onClick(event);
+    public void setItem(int slot, @Nullable ItemStack item) {
+        inventory.setItem(slot, item);
+    }
+
+    public void setClick(int slot, @Nullable Clickable click) {
+        if (click == null){
+            clicks.remove(slot);
+            return;
         }
+
+        clicks.put(slot, click);
     }
 
-    protected void onBottomClick(InventoryClickEvent event) {
+    public void openPrevious(@NotNull Player player) {
+        Objects.requireNonNull(player, "player must not be null");
 
+        if (previousMenu != null) previousMenu.open(player);
     }
 
-
-    protected void onOpen(InventoryOpenEvent event) {
+    public void close() {
+        inventory.getViewers().forEach(HumanEntity::closeInventory);
     }
 
-    protected void onClose(InventoryCloseEvent event) {
+    protected void initialize() {}
+
+    protected void onClick(ClickContext event) {
+        Clickable click = clicks.get(event.getSlot());
+        if (click != null) click.onClick(event);
     }
 
-    public @Nullable <M extends ElementMeta, T extends Element> T applyElement(MenuMeta<M> menuMeta, String key, Function<M, T> factory) {
-        return Element.applyElement(menuMeta, key, factory, this::setElement);
-    }
+    protected void onBottomClick(ClickContext event) {}
 
-    public void setElement(Iterable<Integer> slots, Element element, boolean render) {
-        for (int slot : slots) elements.put(slot, element);
+    protected void onOpen(InventoryOpenEvent event) {}
 
-        if (render) {
-            ItemStack item = element != null ? element.getItem() : null;
-            for (int slot : slots) inventory.setItem(slot, item);
-        }
-    }
+    protected void onClose(InventoryCloseEvent event) {}
 
-    public void setElement(Iterable<Integer> slots, Element element) {
-        setElement(slots, element, true);
-    }
-
-    public void setElement(int slot, Element element, boolean render) {
-        setElement(Collections.singletonList(slot), element, render);
-    }
-
-    public void setElement(int slot, Element element) {
-        setElement(Collections.singletonList(slot), element, true);
-    }
-
-    private Element previousIcon(ElementMeta iconMeta) {
-        return Element.from(iconMeta.getItem(previousMenu == null ? "not_previous" : ItemData.DEFAULT_STATE), click ->
-                openPrevious(click.getWhoClicked()));
-    }
 }

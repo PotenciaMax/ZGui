@@ -24,7 +24,7 @@ public final class SignPacketUtil {
 
     public static void sendSignEditor(Player player, Location location) {
         Vector3i pos = new Vector3i(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-        WrapperPlayServerOpenSignEditor packet = new WrapperPlayServerOpenSignEditor(pos, false);
+        WrapperPlayServerOpenSignEditor packet = new WrapperPlayServerOpenSignEditor(pos, true);
         PacketEvents.getAPI().getPlayerManager().getUser(player).sendPacket(packet);
     }
 

@@ -41,6 +41,8 @@ public class SignMenu {
     }
 
     public void open(Player player) {
+        player.closeInventory();
+
         ZGui.get().getSignMenuManager().registerMenu(player.getUniqueId(), this);
         if (fakeSign) SignPacketUtil.openSignEditor(player, signLocation, meta.getLines(), meta.getSignType());
         SignPacketUtil.sendSignEditor(player, signLocation);

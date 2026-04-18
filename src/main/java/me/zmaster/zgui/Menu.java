@@ -1,6 +1,7 @@
 package me.zmaster.zgui;
 
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 
 /**
  * Represents a generic menu in the GUI system.
@@ -13,6 +14,6 @@ public interface Menu {
      *
      * @param player the player to open the menu for
      */
-    void open(HumanEntity player);
+    void open(Player player);
 
 }

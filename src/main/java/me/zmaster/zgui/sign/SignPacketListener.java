@@ -40,8 +40,9 @@ public class SignPacketListener implements PacketListener {
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 Player player = Bukkit.getPlayer(user.getUUID());
-                signMenu.onClose(player, lines);
                 if (signMenu.isFakeSign()) SignPacketUtil.sendClearSign(player, signMenu.getSignLocation());
+
+                signMenu.onClose(player, lines);
             });
 
             signMenuManager.unregisterMenu(user.getUUID());

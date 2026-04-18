@@ -1,41 +1,20 @@
 package me.zmaster.zgui.inventory.element.view;
 
+import me.zmaster.zgui.inventory.element.Clickable;
 
-import me.zmaster.zgui.inventory.AbstractMenu;
-import me.zmaster.zgui.inventory.element.Element;
-import me.zmaster.zgui.inventory.meta.ElementMeta;
-import me.zmaster.zgui.inventory.meta.MenuMeta;
-import org.jetbrains.annotations.Nullable;
+import java.util.Collection;
 
-import java.util.*;
-import java.util.function.Function;
+public interface ElementsView<T extends Clickable> {
 
-public class ElementsView implements View {
+    void update();
 
-    private final Map<Element, List<Integer>> elements = new HashMap<>();
-    private final AbstractMenu menu;
+    Collection<T> getElements();
 
-    public ElementsView(AbstractMenu menu) {
-        this.menu = Objects.requireNonNull(menu, "menu must not be null");
+    default void addElement(T element) {
+        getElements().add(element);
     }
 
-    @Override
-    public void update() {
-        for (Map.Entry<Element, List<Integer>> entry : elements.entrySet()) {
-            menu.setElement(entry.getValue(), entry.getKey());
-        }
+    default void removeElement(T element) {
+        getElements().remove(element);
     }
-
-    public Map<Element, List<Integer>> getElements() {
-        return elements;
-    }
-
-    public void setElement(List<Integer> slots, Element element) {
-        elements.put(element, slots);
-    }
-
-    public @Nullable <M extends ElementMeta, T extends Element> T applyElement(MenuMeta<M> menuMeta, String key, Function<M, T> factory) {
-        return Element.applyElement(menuMeta, key, factory, this::setElement);
-    }
-
 }

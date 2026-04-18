@@ -1,5 +1,6 @@
 package me.zmaster.zgui.inventory;
 
+import me.zmaster.zgui.inventory.context.ClickContext;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,16 +11,16 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class InventoryMenuManager {
 
     private final Plugin plugin;
-    private final Map<UUID, AbstractMenu> registeredInventories = new HashMap<>();
+    private final Map<Inventory, AbstractMenu> registeredInventories = new HashMap<>();
 
     public InventoryMenuManager(Plugin plugin) {
         this.plugin = plugin;
@@ -30,65 +31,87 @@ public class InventoryMenuManager {
         return registeredInventories.values();
     }
 
-    public AbstractMenu getRegisteredMenu(UUID id) {
-        return registeredInventories.get(id);
+    public AbstractMenu getRegisteredMenu(Inventory inventory) {
+        return registeredInventories.get(inventory);
     }
 
-    public void registerMenu(UUID id, AbstractMenu menu) {
-        registeredInventories.put(id, menu);
+    public void registerMenu(AbstractMenu menu) {
+        registeredInventories.put(menu.inventory, menu);
     }
 
-    public void unregisterMenu(UUID id) {
-        registeredInventories.remove(id);
+    public void unregisterMenu(AbstractMenu menu) {
+        registeredInventories.remove(menu.inventory, menu);
     }
 
     public void unregisterMenus(Plugin plugin) {
+        registeredInventories.entrySet().removeIf(entry -> {
+            AbstractMenu menu = entry.getValue();
+            Plugin menuPlugin = JavaPlugin.getProvidingPlugin(menu.getClass());
+
+            if (plugin.equals(menuPlugin)) {
+                menu.close();
+                return true;
+            }
+
+            return false;
+        });
     }
 
     public class MenuListener implements Listener {
 
         @EventHandler
         public void openListener(InventoryOpenEvent event) {
-            AbstractMenu menu = getRegisteredMenu(event.getPlayer().getUniqueId());
+            AbstractMenu menu = getRegisteredMenu(event.getInventory());
 
-            if (menu != null) menu.onOpen(event);
+            if (menu != null) {
+                menu.onOpen(event);
+
+                if (event.isCancelled()) {
+                    unregisterMenu(menu);
+                }
+            }
         }
 
         @EventHandler
         public void closeListener(InventoryCloseEvent event) {
-            AbstractMenu menu = getRegisteredMenu(event.getPlayer().getUniqueId());
+            Inventory inv = event.getInventory();
 
+            AbstractMenu menu = getRegisteredMenu(inv);
             if (menu == null) return;
 
             // The onClose will be executed after the inventory is already closed to avoid bugs
             Bukkit.getScheduler().runTask(plugin, () -> {
                 menu.onClose(event);
-                unregisterMenu(event.getPlayer().getUniqueId());
+                if (menu.inventory.getViewers().isEmpty()) unregisterMenu(menu);
             });
         }
 
-
         @EventHandler
         public void clickListener(InventoryClickEvent event) {
-            AbstractMenu menu = getRegisteredMenu(event.getWhoClicked().getUniqueId());
+            Inventory inv = event.getInventory();
 
-            if (menu == null) return;
-
-            event.setCancelled(true);
+            AbstractMenu menu = getRegisteredMenu(inv);
+            if (menu == null) {
+                Bukkit.broadcastMessage("menu null");
+                return;
+            }
 
             Inventory clickedInv = event.getClickedInventory();
             if (clickedInv == null) return;
 
-            if (clickedInv.equals(event.getView().getTopInventory())) {
-                menu.onClick(event);
+            ClickContext context = new ClickContext(menu, event);
+            context.setEventCancelled(true);
+
+            if (clickedInv.equals(inv)) {
+                menu.onClick(context);
             } else if (clickedInv.equals(event.getView().getBottomInventory())) {
-                menu.onBottomClick(event);
+                menu.onBottomClick(context);
             }
         }
 
         @EventHandler
         public void dragListener(InventoryDragEvent event) {
-            AbstractMenu menu = getRegisteredMenu(event.getWhoClicked().getUniqueId());
+            AbstractMenu menu = getRegisteredMenu(event.getInventory());
 
             if (menu != null) event.setCancelled(true);
         }
