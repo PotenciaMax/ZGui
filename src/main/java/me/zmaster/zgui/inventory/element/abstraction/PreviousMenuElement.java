@@ -5,6 +5,7 @@ import me.zmaster.zgui.inventory.context.ClickContext;
 import me.zmaster.zgui.inventory.meta.ElementMeta;
 import me.zmaster.zgui.inventory.meta.data.ItemData;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class PreviousMenuElement extends AbstractElement {
 
@@ -23,7 +24,7 @@ public class PreviousMenuElement extends AbstractElement {
     }
 
     @Override
-    public void onClick(ClickContext context) {
+    public void onClick(@NotNull ClickContext context) {
         menu.openPrevious(context.getPlayer());
     }
 }

@@ -8,38 +8,22 @@ import me.zmaster.zgui.inventory.element.view.ElementsView;
 import me.zmaster.zgui.inventory.element.view.SimpleElementsView;
 import me.zmaster.zgui.inventory.element.view.SortedPagedIconsView;
 import me.zmaster.zgui.inventory.meta.MenuMeta;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Predicate;
-
-/**
- * A menu implementation that supports pagination of icons.
- * <p>
- * This menu manages a list of paged icons and provides
- * functionality to navigate between pages using next and previous page icons.
- * It uses separate updaters to refresh navigation icons and paged icons specifically.
- */
 public abstract class AbstractPagedMenu<E extends Icon> extends AbstractMenu {
 
-    private final List<E> icons = new ArrayList<>();
     private final SortedPagedIconsView<E> pagedView = new SortedPagedIconsView<>(this);
     private final ElementsView<Element> navigationView = new SimpleElementsView<>(this);
-    private Predicate<? extends E> filter;
-    private Comparator<? extends E> comparator;
 
     public AbstractPagedMenu(MenuMeta<?> menuMeta, Menu previousMenu) {
         super(menuMeta, previousMenu);
 
         menuMeta.getElementMeta("next_page")
-                .map(meta -> new NextPageElement(meta, pagedView, navigationView, NextPageElement.NEXT_PAGE_DIRECTION))
-                .ifPresent(getNavigationView()::addElement);
+                .map(meta -> new NextPageElement(meta, NextPageElement.NEXT_PAGE_DIRECTION, pagedView, navigationView))
+                .ifPresent(navigationView::addElement);
 
         menuMeta.getElementMeta("previous_page")
-                .map(meta -> new NextPageElement(meta, pagedView, navigationView, NextPageElement.PREVIOUS_PAGE_DIRECTION))
-                .ifPresent(getNavigationView()::addElement);
+                .map(meta -> new NextPageElement(meta, NextPageElement.PREVIOUS_PAGE_DIRECTION, pagedView, navigationView))
+                .ifPresent(navigationView::addElement);
     }
 
     /**
@@ -62,6 +46,8 @@ public abstract class AbstractPagedMenu<E extends Icon> extends AbstractMenu {
 
     @Override
     protected void initialize() {
+        super.initialize();
+
         pagedView.update();
         navigationView.update();
     }

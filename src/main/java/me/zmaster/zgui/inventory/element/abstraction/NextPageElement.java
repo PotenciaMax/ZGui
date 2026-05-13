@@ -9,14 +9,14 @@ import me.zmaster.zgui.inventory.util.Formatter;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a navigation icon used in paged menus to move between pages.
  * Handles displaying the icon item based on whether the next/previous page
  * is available and processes click events to update the current page.
  */
-public class NextPageElement implements Element {
+public class NextPageElement extends AbstractElement {
 
     public static final int NEXT_PAGE_DIRECTION = 1;
     public static final int PREVIOUS_PAGE_DIRECTION = -1;
@@ -26,13 +26,15 @@ public class NextPageElement implements Element {
     private final ElementsView<?> navigationView;
     private final int pageDirection;
 
-    public NextPageElement(ElementMeta meta, PagedIconsView<?> pageView, ElementsView<?> navigationView, int pageDirection) {
+    public NextPageElement(@NotNull ElementMeta meta, int pageDirection, @NotNull PagedIconsView<?> pageView, @NotNull ElementsView<?> navigationView) {
+        super(meta);
+
         if (pageDirection == 0) throw new IllegalArgumentException("pageDirection cannot be 0");
 
-        this.meta = meta;
-        this.pageView = pageView;
-        this.navigationView = navigationView;
+        this.meta = Objects.requireNonNull(meta);
         this.pageDirection = pageDirection;
+        this.pageView = Objects.requireNonNull(pageView);
+        this.navigationView = Objects.requireNonNull(navigationView);
     }
 
     @Override
@@ -52,18 +54,13 @@ public class NextPageElement implements Element {
     }
 
     @Override
-    public void onClick(ClickContext event) {
+    public void onClick(@NotNull ClickContext event) {
         int nextPage = calculateNextPage();
         if (nextPage == 0) return;
 
         pageView.setPage(nextPage);
         pageView.update();
         navigationView.update();
-    }
-
-    @Override
-    public @NotNull List<Integer> getSlots() {
-        return meta.getSlots();
     }
 
     /**

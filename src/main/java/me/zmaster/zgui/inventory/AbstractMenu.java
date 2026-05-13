@@ -24,6 +24,7 @@ import java.util.*;
 public abstract class AbstractMenu implements Menu {
 
     final Inventory inventory;
+
     private final Map<Integer, Clickable> clicks = new HashMap<>();
     private final ElementsView<Element> elementsView = new SimpleElementsView<>(this);
     private final Menu previousMenu;
@@ -34,7 +35,7 @@ public abstract class AbstractMenu implements Menu {
         this.previousMenu = previousMenu;
 
         menuMeta.getElementMeta("close")
-                .map(meta -> Element.from(meta, click -> click.getPlayer().closeInventory()))
+                .map(meta -> Element.fromMeta(meta, click -> click.getPlayer().closeInventory()))
                 .ifPresent(elementsView::addElement);
 
         menuMeta.getElementMeta("previous")
@@ -104,7 +105,9 @@ public abstract class AbstractMenu implements Menu {
         inventory.getViewers().forEach(HumanEntity::closeInventory);
     }
 
-    protected void initialize() {}
+    protected void initialize() {
+        elementsView.update();
+    }
 
     protected void onClick(ClickContext event) {
         Clickable click = clicks.get(event.getSlot());

@@ -2,6 +2,7 @@ package me.zmaster.zgui.inventory.element.view;
 
 import me.zmaster.zgui.inventory.AbstractMenu;
 import me.zmaster.zgui.inventory.element.Icon;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,16 +27,17 @@ public class SortedPagedIconsView<I extends Icon> implements PagedIconsView<I> {
 
     @Override
     public void update() {
-        delegate.setElements(new ArrayList<>(allElements));
+        List<I> elements = new ArrayList<>(allElements);
 
-        if (filter != null) delegate.getElements().removeIf(filter.negate());
-        if (comparator != null) delegate.getElements().sort(comparator);
+        if (filter != null) elements.removeIf(filter.negate());
+        if (comparator != null) elements.sort(comparator);
 
+        delegate.setElements(elements);
         delegate.update();
     }
 
     @Override
-    public List<I> getElements() {
+    public @NotNull List<I> getElements() {
         return allElements;
     }
 

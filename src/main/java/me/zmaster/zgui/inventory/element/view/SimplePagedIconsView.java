@@ -32,7 +32,7 @@ public class SimplePagedIconsView<T extends Icon> implements PagedIconsView<T> {
     }
 
     @Override
-    public List<T> getElements() {
+    public @NotNull List<T> getElements() {
         return elements;
     }
 

@@ -79,10 +79,11 @@ public class InventoryMenuManager {
             AbstractMenu menu = getRegisteredMenu(inv);
             if (menu == null) return;
 
+            if (menu.inventory.getViewers().size() <= 1) unregisterMenu(menu);
+
             // The onClose will be executed after the inventory is already closed to avoid bugs
             Bukkit.getScheduler().runTask(plugin, () -> {
                 menu.onClose(event);
-                if (menu.inventory.getViewers().isEmpty()) unregisterMenu(menu);
             });
         }
 
@@ -91,10 +92,7 @@ public class InventoryMenuManager {
             Inventory inv = event.getInventory();
 
             AbstractMenu menu = getRegisteredMenu(inv);
-            if (menu == null) {
-                Bukkit.broadcastMessage("menu null");
-                return;
-            }
+            if (menu == null) return;
 
             Inventory clickedInv = event.getClickedInventory();
             if (clickedInv == null) return;
